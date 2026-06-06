@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ระบบจัดการสต๊อกยาและเวชภัณฑ์</title>
+    <link rel="stylesheet" href="./styles.css?v=20260606-12" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="unit-sidebar" aria-label="เลือกหน่วยงาน">
+        <div class="sidebar-top">
+          <div class="brand-lockup">
+            <span class="brand-mark" aria-hidden="true">⚕</span>
+            <strong class="sidebar-text">Med Stock</strong>
+          </div>
+          <div class="sidebar-actions">
+            <button class="icon-button" id="sidebarToggle" title="หุบเมนู" aria-label="หุบเมนู" aria-expanded="true">
+              ‹
+            </button>
+          </div>
+        </div>
+        <button class="sidebar-home" id="homeButton" type="button" title="Home" data-icon="⌂">
+          <span>Home</span>
+        </button>
+        <select class="mobile-unit-select" id="mobileUnitSelect" aria-label="เลือกหน่วยงาน">
+          <option value="home">Home</option>
+          <option value="CPR Box">CPR Box</option>
+          <option value="ยารถ Emer">ยารถ Emer</option>
+          <option value="รถ EMER adult">รถ EMER adult</option>
+          <option value="รถ EMER ped">รถ EMER ped</option>
+        </select>
+        <nav class="unit-tabs" id="unitTabs"></nav>
+        <div class="sidebar-bottom-menu">
+          <button class="sidebar-menu-button" id="settingsButton" type="button" title="ตั้งค่า Telegram" data-icon="⚙">
+            <span>ตั้งค่า Telegram</span>
+          </button>
+        </div>
+      </aside>
+
+      <div class="content-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Medication & Supply Stock</p>
+          <h1 id="pageTitle">ระบบจัดการสต๊อกยาและเวชภัณฑ์</h1>
+          <p class="subtitle" id="pageSubtitle">เช็คง่าย แก้เลขไว แจ้งเตือนของใกล้หมดอายุ</p>
+        </div>
+      </header>
+
+      <section class="dashboard" aria-label="Dashboard">
+        <article class="summary-panel total">
+          <span>รายการทั้งหมด</span>
+          <strong id="totalItems">0</strong>
+        </article>
+        <article class="summary-panel warning">
+          <span>ใกล้หมดอายุ</span>
+          <strong id="expiringItems">0</strong>
+        </article>
+        <article class="summary-panel danger">
+          <span>หมดอายุแล้ว</span>
+          <strong id="expiredItems">0</strong>
+        </article>
+        <article class="summary-panel calm">
+          <span>สต๊อกต่ำกว่าเกณฑ์</span>
+          <strong id="shortItems">0</strong>
+        </article>
+      </section>
+
+      <div class="info-grid" id="infoGrid">
+        <section class="alerts-section" id="alertsSection" aria-label="แจ้งเตือน">
+          <div class="section-heading">
+            <h2>แจ้งเตือน</h2>
+            <button class="secondary-button" id="sendTelegramButton">ส่ง Telegram</button>
+          </div>
+          <div class="alert-list" id="alertList"></div>
+        </section>
+
+        <section class="check-log-section" aria-label="ประวัติการเช็คสต๊อก">
+          <div class="section-heading">
+            <h2>ประวัติการเช็คสต๊อก</h2>
+            <p id="checkLogCount">ยังไม่มีประวัติ</p>
+          </div>
+          <div class="check-log-list" id="checkLogList"></div>
+        </section>
+      </div>
+
+      <section class="stock-section" id="stockSection" aria-label="รายการสต๊อก">
+        <div class="section-heading">
+          <h2 id="unitTitle">CPR Box</h2>
+          <p class="mobile-last-checked" id="lastCheckedTop">ยังไม่มีบันทึกการตรวจ</p>
+        </div>
+        <div class="inspection-bar">
+          <label>
+            ผู้ตรวจสอบ
+            <input id="inspectionInspector" type="text" placeholder="กรอกครั้งเดียวก่อนบันทึก" />
+          </label>
+          <p id="lastChecked">ยังไม่มีบันทึกการตรวจ</p>
+          <button class="primary-button" id="saveInspectionButton">บันทึกการตรวจ</button>
+        </div>
+        <section class="toolbar" aria-label="เครื่องมือ">
+          <div class="toolbar-actions">
+            <input class="search-input" id="searchInput" type="search" placeholder="ค้นหารายการ" />
+            <select class="sort-select" id="sortSelect" aria-label="เรียงรายการ">
+              <option value="default">เรียงตามเดิม</option>
+              <option value="az">A-Z</option>
+              <option value="za">Z-A</option>
+              <option value="expiryAsc">ใกล้หมดอายุ</option>
+            </select>
+            <select class="filter-select" id="statusFilter" aria-label="กรองตามสถานะ">
+              <option value="all">ทุกสถานะ</option>
+              <option value="ok">พร้อมใช้</option>
+              <option value="short">ต้องเติม</option>
+              <option value="expiring">ใกล้หมดอายุ</option>
+              <option value="expired">หมดอายุ</option>
+            </select>
+            <button class="secondary-button toolbar-icon-button" id="exportExcelButton" title="ส่งออก Excel" aria-label="ส่งออก Excel">XLS</button>
+            <button class="secondary-button toolbar-icon-button" id="exportButton" title="สำรอง JSON" aria-label="สำรอง JSON">{}</button>
+            <button class="secondary-button toolbar-icon-button" id="recoverItemsButton" title="กู้รายการที่หาย" aria-label="กู้รายการที่หาย">↺</button>
+            <button class="secondary-button toolbar-icon-button" id="resetSeedButton" title="โหลดจาก Excel" aria-label="โหลดจาก Excel">⇣</button>
+            <label class="secondary-button toolbar-icon-button import-label" title="นำเข้า" aria-label="นำเข้า">
+              ⇡
+              <input type="file" id="importFile" accept="application/json" />
+            </label>
+            <button class="primary-button toolbar-icon-button" id="addItemButton" title="เพิ่มรายการ" aria-label="เพิ่มรายการ">+</button>
+          </div>
+        </section>
+        <div class="stock-list" id="stockList"></div>
+      </section>
+      </div>
+    </main>
+
+    <dialog class="modal" id="itemDialog">
+      <form method="dialog" class="modal-card" id="itemForm">
+        <div class="modal-head">
+          <h2 id="dialogTitle">เพิ่มรายการ</h2>
+          <button class="icon-button" type="button" data-close-dialog aria-label="ปิด">×</button>
+        </div>
+
+        <input type="hidden" id="editingId" />
+
+        <label>
+          ชื่อยา / เวชภัณฑ์
+          <input id="itemName" type="text" required placeholder="เช่น Adrenaline 1 mg/ml" />
+        </label>
+
+        <div class="form-grid">
+          <label>
+            จำนวนที่ต้องมี
+            <input id="requiredQty" type="number" min="0" step="1" required />
+          </label>
+          <label>
+            จำนวนที่นับได้
+            <input id="countedQty" type="number" min="0" step="1" required />
+          </label>
+        </div>
+
+        <label class="checkbox-row">
+          <input id="noExpiry" type="checkbox" />
+          ไม่มีวันหมดอายุ
+        </label>
+
+        <label id="expiryWrap">
+          วันหมดอายุ
+          <input id="expiryDate" type="date" />
+        </label>
+
+        <div class="modal-actions">
+          <button class="danger-button" id="deleteItemButton" type="button">ลบ</button>
+          <div>
+            <button class="secondary-button" type="button" data-close-dialog>ยกเลิก</button>
+            <button class="primary-button" id="saveItemButton" value="default">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="settingsDialog">
+      <form method="dialog" class="modal-card" id="settingsForm">
+        <div class="modal-head">
+          <h2>ตั้งค่า Telegram</h2>
+          <button class="icon-button" type="button" data-close-dialog aria-label="ปิด">×</button>
+        </div>
+        <p class="hint">กรอก Bot Token และ Chat ID เพื่อให้แดชบอร์ดส่งข้อความแจ้งเตือนได้</p>
+        <label>
+          Bot Token
+          <input id="telegramToken" type="password" autocomplete="off" placeholder="123456:ABC..." />
+        </label>
+        <label>
+          Chat ID
+          <input id="telegramChatId" type="text" autocomplete="off" placeholder="-100xxxxxxxxxx หรือ 123456789" />
+        </label>
+        <label>
+          เตือนก่อนหมดอายุ
+          <select id="expiryWindow">
+            <option value="7">7 วัน</option>
+            <option value="14">14 วัน</option>
+            <option value="30">30 วัน</option>
+            <option value="60">60 วัน</option>
+            <option value="90">90 วัน</option>
+          </select>
+        </label>
+        <label>
+          Google Sheet Web App URL
+          <input id="googleSheetUrl" type="url" autocomplete="off" placeholder="https://script.google.com/macros/s/..." />
+        </label>
+        <div class="modal-actions right">
+          <button class="secondary-button" type="button" data-close-dialog>ยกเลิก</button>
+          <button class="primary-button" id="saveSettingsButton" value="default">บันทึก</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <template id="stockCardTemplate">
+      <article class="stock-card">
+        <div class="stock-card-main">
+          <div>
+            <h3></h3>
+            <p class="meta"></p>
+          </div>
+          <span class="status-pill"></span>
+        </div>
+        <div class="qty-editor" aria-label="แก้ไขจำนวน">
+          <button class="qty-button decrease" type="button">−</button>
+          <input class="qty-input" type="number" min="0" step="1" />
+          <button class="qty-button increase" type="button">+</button>
+        </div>
+        <button class="text-button edit-button" type="button">แก้ไข</button>
+      </article>
+    </template>
+
+    <script src="./seed-data.js?v=20260606-12"></script>
+    <script src="./app.js?v=20260606-12"></script>
+  </body>
+</html>
