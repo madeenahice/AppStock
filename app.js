@@ -108,6 +108,7 @@ const els = {
   telegramChatId: document.querySelector("#telegramChatId"),
   expiryWindow: document.querySelector("#expiryWindow"),
   googleSheetUrl: document.querySelector("#googleSheetUrl"),
+  clearSavedStateButton: document.querySelector("#clearSavedStateButton"),
   toast: document.querySelector("#toast"),
 };
 
@@ -133,14 +134,11 @@ function fiscalYear(date) {
 }
 
 function inspectorNames() {
-  let saved = [];
-  try { saved = JSON.parse(localStorage.getItem(INSPECTORS_KEY) || "[]"); } catch {}
-  return [...new Set([...(Array.isArray(saved) ? saved : []), ...checkLogs.map(log => log.inspector), ...getAllItems().map(item => item.inspector)].filter(name => typeof name === "string" && name.trim()).map(name => name.trim()))].sort((a,b) => a.localeCompare(b, "th"));
+  return [...new Set([...checkLogs.map(log => log.inspector), ...getAllItems().map(item => item.inspector)].filter(name => typeof name === "string" && name.trim()).map(name => name.trim()))].sort((a,b) => a.localeCompare(b, "th"));
 }
 
 function renderInspectors(selected = els.inspectionInspector.value) {
   const names = inspectorNames();
-  localStorage.setItem(INSPECTORS_KEY, JSON.stringify(names));
   els.inspectorOptions.innerHTML = names.map(name => '<option value="' + escapeHtml(name) + '"></option>').join('');
   els.inspectionInspector.value = selected || "";
 }
@@ -189,28 +187,9 @@ function daysFromNow(days) {
 }
 
 function loadData() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return cloneData(defaultData);
-
-  try {
-    const parsed = JSON.parse(stored);
-    if (Array.isArray(parsed["กล่องยา EMER"]) && !Array.isArray(parsed["Emer medicine"])) {
-      parsed["Emer medicine"] = parsed["กล่องยา EMER"];
-      delete parsed["กล่องยา EMER"];
-    }
-
-    const normalized = normalizeImportedData(parsed);
-    if (SOURCE_VERSION && localStorage.getItem(SOURCE_VERSION_KEY) !== SOURCE_VERSION) {
-      backupBeforeSourceImport(normalized, "local");
-      const migrated = applySourceCatalog(normalized);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-      localStorage.setItem(SOURCE_VERSION_KEY, SOURCE_VERSION);
-      return migrated;
-    }
-    return normalized;
-  } catch {
-    return cloneData(defaultData);
-  }
+  localStorage.removeItem?.(STORAGE_KEY);
+  localStorage.removeItem?.(SOURCE_VERSION_KEY);
+  return cloneData(defaultData);
 }
 
 function cloneData(value) {
@@ -218,8 +197,8 @@ function cloneData(value) {
 }
 
 function backupBeforeSourceImport(previous, origin) {
-  const key = `med-stock-before-source-${SOURCE_VERSION}-${origin}`;
-  if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ data: previous, backedUpAt: new Date().toISOString() }));
+  void previous;
+  void origin;
 }
 
 function applySourceCatalog(previous) {
@@ -257,20 +236,11 @@ function loadSettings() {
 }
 
 function loadCheckLogs() {
-  const stored = localStorage.getItem(CHECK_LOG_KEY);
-  if (!stored) return [];
-
-  try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit })) : [];
-  } catch {
-    return [];
-  }
+  localStorage.removeItem?.(CHECK_LOG_KEY);
+  return [];
 }
 
 function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  localStorage.setItem(SOURCE_VERSION_KEY, SOURCE_VERSION);
   queueCloudStateSave();
 }
 
@@ -279,7 +249,6 @@ function saveSettings() {
 }
 
 function saveCheckLogs() {
-  localStorage.setItem(CHECK_LOG_KEY, JSON.stringify(checkLogs));
   queueCloudStateSave();
 }
 
@@ -309,6 +278,7 @@ function bindEvents() {
   els.sidebarToggle.addEventListener("click", toggleSidebar);
   els.settingsForm.addEventListener("submit", saveSettingsForm);
   els.sendTelegramButton.addEventListener("click", sendTelegramAlert);
+  els.clearSavedStateButton.addEventListener("click", clearSavedState);
 }
 
 function closeParentDialog(event) {
@@ -1066,6 +1036,52 @@ async function saveCloudState() {
   }
 }
 
+async function clearCloudState() {
+  if (!settings.googleSheetUrl) return false;
+
+  try {
+    await fetch(settings.googleSheetUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "clearState", source: "med-stock", clearedAt: new Date().toISOString() }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function clearSavedState() {
+  if (!confirm("ล้างข้อมูลที่เว็บจำไว้ทั้งหมด แล้วโหลดรายการตั้งต้นใหม่?")) return;
+
+  cloudSyncPaused = true;
+  clearTimeout(cloudSaveTimer);
+  els.clearSavedStateButton.disabled = true;
+  showToast("กำลังล้างข้อมูลที่เว็บจำไว้");
+  await clearCloudState();
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(CHECK_LOG_KEY);
+  localStorage.removeItem(INSPECTORS_KEY);
+  localStorage.removeItem(SOURCE_VERSION_KEY);
+  data = cloneData(defaultData);
+  checkLogs = [];
+  activeView = "home";
+  activeUnit = UNITS[0];
+  searchTerm = "";
+  sortMode = "default";
+  statusFilter = "all";
+  els.searchInput.value = "";
+  els.sortSelect.value = "default";
+  els.statusFilter.value = "all";
+  renderInspectors("");
+  cloudSyncPaused = false;
+  els.clearSavedStateButton.disabled = false;
+  els.settingsDialog.close();
+  render();
+  showToast("ล้างข้อมูลที่เว็บจำไว้แล้ว");
+}
+
 async function loadCloudState() {
   if (!settings.googleSheetUrl) return;
 
@@ -1082,11 +1098,7 @@ async function loadCloudState() {
     cloudSyncPaused = true;
     data = nextData;
     checkLogs = nextCheckLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
-    const names = [...inspectorNames(), ...(response.state.inspectors || [])];
-    localStorage.setItem(INSPECTORS_KEY, JSON.stringify(names));
     renderInspectors();
-    saveData();
-    saveCheckLogs();
     cloudSyncPaused = false;
     render();
   } catch {
@@ -1392,7 +1404,6 @@ function importData(event) {
       const parsed = JSON.parse(String(reader.result));
       const importedData = normalizeImportedData(parsed.data || parsed);
       data = importedData;
-      localStorage.setItem(INSPECTORS_KEY, JSON.stringify([...inspectorNames(), ...(Array.isArray(parsed.inspectors) ? parsed.inspectors : [])]));
       if (Array.isArray(parsed.checkLogs)) {
         checkLogs = parsed.checkLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
         saveCheckLogs();
