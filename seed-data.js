@@ -1,1 +1,1656 @@
-window.SEED_STOCK_DATA = {"CPR Box":[{"name":"Adrenaline Injection 1 mg/ml (1:1000)","requiredQty":10,"countedQty":10,"expiryDate":null,"inspector":""},{"name":"Atropine 0.6 mg 1 ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"10% Calcium gluconate  10 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Cordarone 150 mg/3ml Inj","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"50% Glucose  50 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Dopamex injection 250 mg 10 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Diazepam 10 mg/2 ml 2 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"50%Magnesium sulfate 2 ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Adenocor 6 mg 2 ml","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"Hydrocortisone 100 mg 2 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"7.5% Sodium Bicarbonate Inj 50 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Lasix 20 mg/2ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Chlorpheniramine10mg/1ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Dexamethazone 4 mg","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Beradual forte 4 ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Ventolin 2.5 ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"2% Lidocain without Adrenaline (20mg/ml )","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""}],"ยารถ Emer":[{"name":"Adrenaline (1:1000) 1 mg","requiredQty":15,"countedQty":15,"expiryDate":null,"inspector":""},{"name":"Atropine 0.6 mg","requiredQty":6,"countedQty":6,"expiryDate":null,"inspector":""},{"name":"Adenosine 6 mg/2ml","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"10% Calcium gluconate","requiredQty":6,"countedQty":6,"expiryDate":null,"inspector":""},{"name":"7.5% NaCHO3 50 ml","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"50% MgSO4 2 ml","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"50% Glucose 50  ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Amiodarone 150 mg","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"2% Lidocaine (Free Preservative)","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Norepinephrine  4 mg/4ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Dexamethasone 4 mg","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Chlorpheniramine10mg/1ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Diazepam 10 mg.","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Dopamine injection 200 mg 10 ml     *เฉพาะหน่วยไตเทียม","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"0.9% NSS 100 ml.","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"D5W 100 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"D5W 250 ml","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"0.9% NSS 1000 ml.","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""}],"รถ EMER adult":[{"name":"Laryngoscope handle + blade","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Stethoscope","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"กรรไกร","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"ใบ record CPR","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"Magill forceps (Adult)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Magill forceps (Ped)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Oropharyngeal airwa เขียว","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Oropharyngeal airwa เหลือง","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"ET-tube No.6.0","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 6.5","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 7.0","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 7.5","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 8.0","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile Stylet no. 10","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile Stylet no.12","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile Stylet no.14","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.8","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.10","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.12","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.14","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.16","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Strap tube/  Sterile gel /Syring 10 ml","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"IV catheter No. 18","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"IV catheter No. 20","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"IV catheter No. 22","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"IV catheter No. 24","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Needle No.18","requiredQty":10,"countedQty":10,"expiryDate":null,"inspector":""},{"name":"Needle No.20","requiredQty":10,"countedQty":10,"expiryDate":null,"inspector":""},{"name":"Needle No.22","requiredQty":10,"countedQty":10,"expiryDate":null,"inspector":""},{"name":"Syringe size 3 ml","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"Syringe size 5 ml","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"Syringe size 10 ml","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"Syringe size 20 ml","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Syringe size 50 ml","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"IV set","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Extension with T","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Extension No.18\"","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Tegaderm 6*7","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"3-way","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"O2 mask with bag (Adult)","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Ambu-bag (Adult)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No. 6.5","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No.7","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No. 7.5","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"CPE Gown","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Glasses","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"CPR Board","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""}],"รถ EMER ped":[{"name":"Laryngoscope handle","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"blade (Ped) no.00 ตรง","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"blade (Ped) no.0 ตรง","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"blade (Ped) no.1 ตรง","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"blade (Ped) no.00, 0, 1ตรง,","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"blade (Ped) 1 โค้ง","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"blade (Ped) 2 โค้ง","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Stethoscope","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"กรรไกร","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Bladeตรง no.0","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Bladeตรง no.1","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"face mask no.0","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"face mask no.1","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Sterlile syring ball no.0","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Sterlile syring ball no.1","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"ปรอทวัดทางทวาร","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Cord clamp","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"สายวัดความยาว","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"lung test","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"EtCo2 pediatric","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"OG tube no 6","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"OG tube no 8","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"หมวกเด็ก","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Red dot","requiredQty":4,"countedQty":4,"expiryDate":null,"inspector":""},{"name":"Magill forceps (Ped)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Oropharyngeal airway ขาว","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"ET-tube No.2.5 uncuffed","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube No.3.0 uncuffed","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube No.3.0 with cuff","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube No.3.5 with cuff","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 4.0 with cuff","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 4.5 with cuff","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 5.0 with cuff","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"ET-tube 5.5 with cuff","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile Stylet no.6","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Sterile Stylet no.10","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Suction no.6","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.8","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Suction no.10","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Strap tube/  Sterile gel /syring 3 ml","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Face mask no.0","requiredQty":7,"countedQty":7,"expiryDate":null,"inspector":""},{"name":"Face mask no.1","requiredQty":8,"countedQty":8,"expiryDate":null,"inspector":""},{"name":"Face mask no.2","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"O2 mask with bag (Ped)","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Ambu-bag (Neonatal)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Ambu-bag (Ped)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No. 6","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No. 6.5","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No. 7","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Sterile gloves No. 7.5","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"CPE Gown","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Glasses","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"CPR Board","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Oxygen tube (ชั้น 1 Radiant warmmer)","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"3-piece (ชั้น 1 Radiant warmmer)","requiredQty":1,"countedQty":1,"expiryDate":null,"inspector":""},{"name":"Tegaderm 4*4 (ชั้น 1 Radiant warmmer)","requiredQty":5,"countedQty":5,"expiryDate":null,"inspector":""},{"name":"Plastic wrap (ชั้น 2 Radiant warmmer)","requiredQty":2,"countedQty":2,"expiryDate":null,"inspector":""},{"name":"Thermo trace central (ชั้น 2 Radiant warmmer)","requiredQty":3,"countedQty":3,"expiryDate":null,"inspector":""},{"name":"Thermo trace peripheral (ชั้น 2 Radiant warmmer)","requiredQty":0,"countedQty":0,"expiryDate":null,"inspector":""}]};
+// Snapshot of Google Sheets: ต้นฉบับข้อมูล. Generated by scripts/build-seed.cjs.
+window.SEED_SOURCE_VERSION = "rn-source-20260908-2";
+window.SEED_STOCK_DATA = {
+  "Med Stock": [
+    {
+      "sourceId": "rn-source-8-2",
+      "name": "CPM 10 mg",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-3",
+      "name": "Dexa 4 mg",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-4",
+      "name": "Diazepam 10 mg",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-5",
+      "name": "NTG 25 mg/5 ml",
+      "requiredQty": 4,
+      "countedQty": 4,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-6",
+      "name": "Nicardipine 25mg/25ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-7",
+      "name": "Norepineprhine 4 mg/4ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-8",
+      "name": "Furosmide 20 mg",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-9",
+      "name": "50% Glucose 50 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-10",
+      "name": "Beradual Forte  NB",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-11",
+      "name": "Ventolin 2.5 mg NB",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-12",
+      "name": "Pulmicort 1mg/2ml NB",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-13",
+      "name": "Hydrocortisone 100 mg",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-14",
+      "name": "Ondransetron 4 mg/2ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-15",
+      "name": "Dimenhydrinate 50 mg",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-16",
+      "name": "Paracetamol 500 mg",
+      "requiredQty": 20,
+      "countedQty": 20,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-17",
+      "name": "Chloram",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-8-18",
+      "name": "Para Syr (120mg/ml)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ],
+  "IV Fluid": [
+    {
+      "sourceId": "rn-source-10-2",
+      "name": "0.9% NSS 1000 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-3",
+      "name": "5% DN/2 1000 ml.",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-4",
+      "name": "5% DNSS 1000 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-5",
+      "name": "Ringer 1000 ml.",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-6",
+      "name": "Acetar1000 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-7",
+      "name": "0.9% NSS 500 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-8",
+      "name": "5% DNSS 500 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-9",
+      "name": "5% DN/2 500 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-10",
+      "name": "5% DN/3 500 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-11",
+      "name": "0.9% NSS 100 ml.",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-12",
+      "name": "5% DW 100 ml.",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-13",
+      "name": "10% DN/2 1000 ml.",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-14",
+      "name": "5% DW 250 ml.",
+      "requiredQty": 4,
+      "countedQty": 4,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ],
+  "Equipment": [
+    {
+      "sourceId": "rn-source-12-2",
+      "name": "EKG 12 lead",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-3",
+      "name": "Infusion pump",
+      "requiredQty": 11,
+      "countedQty": 11,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-4",
+      "name": "Body guard",
+      "requiredQty": 10,
+      "countedQty": 10,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-5",
+      "name": "Ventilator C-1",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-6",
+      "name": "Ventilator T-1",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-7",
+      "name": "Defibrillator X-series",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-8",
+      "name": "Syring pump",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-9",
+      "name": "HFNC Comen",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-12-10",
+      "name": "Ultrasound",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ],
+  "CPR Box": [
+    {
+      "sourceId": "rn-source-2-2",
+      "name": "Adrenaline (1:1000) 1 mg",
+      "requiredQty": 15,
+      "countedQty": 15,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-3",
+      "name": "Atropine 0.6 mg",
+      "requiredQty": 6,
+      "countedQty": 6,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-4",
+      "name": "Adenosine 6 mg/2ml",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-5",
+      "name": "10% Calcium gluconate",
+      "requiredQty": 6,
+      "countedQty": 6,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-6",
+      "name": "7.5% NaCHO3 50 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-7",
+      "name": "50% MgSO4 2 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-8",
+      "name": "50% Glucose 50 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-9",
+      "name": "Amiodarone 150 mg",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-10",
+      "name": "2% Lidocaine (Free Preservative)",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-11",
+      "name": "Norepinephrine 4 mg/4ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-12",
+      "name": "Dexamethasone 4 mg",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-13",
+      "name": "Chlorpheniramine10mg/1ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-14",
+      "name": "Diazepam 10 mg.",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-15",
+      "name": "Dopamine injection 200 mg 10 ml *เฉพาะหน่วยไตเทียม",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-16",
+      "name": "0.9% NSS 100 ml.",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-17",
+      "name": "D5W 100 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-18",
+      "name": "D5W 250 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-2-19",
+      "name": "0.9% NSS 1000 ml.",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ],
+  "Emer medicine": [
+    {
+      "sourceId": "rn-source-0-2",
+      "name": "Adrenaline Injection 1 mg/ml (1:1000)",
+      "requiredQty": 10,
+      "countedQty": 10,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-3",
+      "name": "Atropine 0.6 mg 1 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-4",
+      "name": "10% Calcium gluconate 10 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-5",
+      "name": "Cordarone 150 mg/3ml Inj",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-6",
+      "name": "50% Glucose 50 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-7",
+      "name": "Dopamex injection 250 mg 10 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-8",
+      "name": "Diazepam 10 mg/2 ml 2 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-9",
+      "name": "50%Magnesium sulfate 2 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-10",
+      "name": "Adenocor 6 mg 2 ml",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-11",
+      "name": "Hydrocortisone 100 mg 2 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-12",
+      "name": "7.5% Sodium Bicarbonate Inj 50 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-13",
+      "name": "Lasix 20 mg/2ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-14",
+      "name": "Chlorpheniramine10mg/1ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-15",
+      "name": "Dexamethazone 4 mg",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-16",
+      "name": "Beradual forte 4 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-17",
+      "name": "Ventolin 2.5 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-0-18",
+      "name": "2% Lidocain without Adrenaline (20mg/ml )",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ],
+  "Emer cart Adult": [
+    {
+      "sourceId": "rn-source-4-2",
+      "name": "Laryngoscope handle + blade",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-3",
+      "name": "Stethoscope",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-4",
+      "name": "กรรไกร",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-5",
+      "name": "ใบ record CPR",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-6",
+      "name": "Magill forceps (Adult)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-7",
+      "name": "Magill forceps (Ped)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-8",
+      "name": "Oropharyngeal airwa เขียว",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-9",
+      "name": "Oropharyngeal airwa เหลือง",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-10",
+      "name": "ET-tube No.6.0",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-11",
+      "name": "ET-tube 6.5",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-12",
+      "name": "ET-tube 7.0",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-13",
+      "name": "ET-tube 7.5",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-14",
+      "name": "ET-tube 8.0",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-15",
+      "name": "Sterile Stylet no. 10",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-16",
+      "name": "Sterile Stylet no.12",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-17",
+      "name": "Sterile Stylet no.14",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-18",
+      "name": "Suction no.8",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-19",
+      "name": "Suction no.10",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-20",
+      "name": "Suction no.12",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-21",
+      "name": "Suction no.14",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-22",
+      "name": "Suction no.16",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-23",
+      "name": "Strap tube/ Sterile gel /Syring 10 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-24",
+      "name": "IV catheter No. 18",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-25",
+      "name": "IV catheter No. 20",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-26",
+      "name": "IV catheter No. 22",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-27",
+      "name": "IV catheter No. 24",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-28",
+      "name": "Needle No.18",
+      "requiredQty": 10,
+      "countedQty": 10,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-29",
+      "name": "Needle No.20",
+      "requiredQty": 10,
+      "countedQty": 10,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-30",
+      "name": "Needle No.22",
+      "requiredQty": 10,
+      "countedQty": 10,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-31",
+      "name": "Syringe size 3 ml",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-32",
+      "name": "Syringe size 5 ml",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-33",
+      "name": "Syringe size 10 ml",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-34",
+      "name": "Syringe size 20 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-35",
+      "name": "Syringe size 50 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-36",
+      "name": "IV set",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-37",
+      "name": "Extension with T",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-38",
+      "name": "Extension No.18\"",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-39",
+      "name": "Tegaderm 6*7",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-40",
+      "name": "3-way",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-41",
+      "name": "O2 mask with bag (Adult)",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-42",
+      "name": "Ambu-bag (Adult)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-43",
+      "name": "Sterile gloves No. 6.5",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-44",
+      "name": "Sterile gloves No.7",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-45",
+      "name": "Sterile gloves No. 7.5",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-46",
+      "name": "CPE Gown",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-47",
+      "name": "Glasses",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-48",
+      "name": "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-4-49",
+      "name": "CPR Board",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ],
+  "Emer cart PED": [
+    {
+      "sourceId": "rn-source-6-2",
+      "name": "Laryngoscope handle",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-3",
+      "name": "blade (Ped) no.00 ตรง",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-4",
+      "name": "blade (Ped) no.0 ตรง",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-5",
+      "name": "blade (Ped) no.1 ตรง",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-6",
+      "name": "blade (Ped) no.00, 0, 1ตรง,",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-7",
+      "name": "blade (Ped) 1 โค้ง",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-8",
+      "name": "blade (Ped) 2 โค้ง",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-9",
+      "name": "Stethoscope",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-10",
+      "name": "กรรไกร",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-11",
+      "name": "Bladeตรง no.0",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-12",
+      "name": "Bladeตรง no.1",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-13",
+      "name": "face mask no.0",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-14",
+      "name": "face mask no.1",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-15",
+      "name": "Sterlile syring ball no.0",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-16",
+      "name": "Sterlile syring ball no.1",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-17",
+      "name": "ปรอทวัดทางทวาร",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-18",
+      "name": "Cord clamp",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-19",
+      "name": "สายวัดความยาว",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-20",
+      "name": "lung test",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-21",
+      "name": "EtCo2 pediatric",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-22",
+      "name": "OG tube no 6",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-23",
+      "name": "OG tube no 8",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-24",
+      "name": "หมวกเด็ก",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-25",
+      "name": "Red dot",
+      "requiredQty": 4,
+      "countedQty": 4,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-26",
+      "name": "Magill forceps (Ped)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-27",
+      "name": "Oropharyngeal airway ขาว",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-28",
+      "name": "ET-tube No.2.5 uncuffed",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-29",
+      "name": "ET-tube No.3.0 uncuffed",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-30",
+      "name": "ET-tube No.3.0 with cuff",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-31",
+      "name": "ET-tube No.3.5 with cuff",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-32",
+      "name": "ET-tube 4.0 with cuff",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-33",
+      "name": "ET-tube 4.5 with cuff",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-34",
+      "name": "ET-tube 5.0 with cuff",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-35",
+      "name": "ET-tube 5.5 with cuff",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-36",
+      "name": "Sterile Stylet no.6",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-37",
+      "name": "Sterile Stylet no.10",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-38",
+      "name": "Suction no.6",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-39",
+      "name": "Suction no.8",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-40",
+      "name": "Suction no.10",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-41",
+      "name": "Strap tube/ Sterile gel /syring 3 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-42",
+      "name": "Face mask no.0",
+      "requiredQty": 7,
+      "countedQty": 7,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-43",
+      "name": "Face mask no.1",
+      "requiredQty": 8,
+      "countedQty": 8,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-44",
+      "name": "Face mask no.2",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-45",
+      "name": "O2 mask with bag (Ped)",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-46",
+      "name": "Ambu-bag (Neonatal)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-47",
+      "name": "Ambu-bag (Ped)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-48",
+      "name": "Sterile gloves No. 6",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-49",
+      "name": "Sterile gloves No. 6.5",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-50",
+      "name": "Sterile gloves No. 7",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-51",
+      "name": "Sterile gloves No. 7.5",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-52",
+      "name": "CPE Gown",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-53",
+      "name": "Glasses",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-54",
+      "name": "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-55",
+      "name": "CPR Board",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-56",
+      "name": "Oxygen tube (ชั้น 1 Radiant warmmer)",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-57",
+      "name": "3-piece (ชั้น 1 Radiant warmmer)",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-58",
+      "name": "Tegaderm 4*4 (ชั้น 1 Radiant warmmer)",
+      "requiredQty": 5,
+      "countedQty": 5,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-59",
+      "name": "Plastic wrap (ชั้น 2 Radiant warmmer)",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-60",
+      "name": "Thermo trace central (ชั้น 2 Radiant warmmer)",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-6-61",
+      "name": "Thermo trace peripheral (ชั้น 2 Radiant warmmer)",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    }
+  ]
+};

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ระบบจัดการสต๊อกยาและเวชภัณฑ์</title>
-    <link rel="stylesheet" href="./styles.css?v=20260606-12" />
+    <link rel="stylesheet" href="./styles.css?v=20260908-15" />
   </head>
   <body>
     <main class="app-shell">
@@ -25,10 +25,14 @@
         </button>
         <select class="mobile-unit-select" id="mobileUnitSelect" aria-label="เลือกหน่วยงาน">
           <option value="home">Home</option>
+          <option>Med Stock</option>
+          <option>IV Fluid</option>
+          <option>Equipment</option>
           <option value="CPR Box">CPR Box</option>
-          <option value="ยารถ Emer">ยารถ Emer</option>
-          <option value="รถ EMER adult">รถ EMER adult</option>
-          <option value="รถ EMER ped">รถ EMER ped</option>
+          <option value="Emer medicine">Emer medicine</option>
+          <option value="Emer cart Adult">Emer cart Adult</option>
+          <option value="Emer cart PED">Emer cart PED</option>
+          <option value="dashboard">Dashboard</option>
         </select>
         <nav class="unit-tabs" id="unitTabs"></nav>
         <div class="sidebar-bottom-menu">
@@ -66,6 +70,21 @@
         </article>
       </section>
 
+      <section class="monthly-reminder" id="monthlyReminder" hidden></section>
+      <section class="dashboard-insights" id="dashboardInsights" hidden>
+        <div class="section-heading">
+          <h2>ภาพรวมรายการ</h2>
+          <p>ครบ / รอเบิก / หาไม่พบ</p>
+        </div>
+        <div class="pie-grid" id="dashboardCharts"></div>
+        <div class="section-heading">
+          <h2>ผู้ตรวจเช็คบ่อย</h2>
+          <p>นับจากประวัติการตรวจ</p>
+        </div>
+        <div class="inspector-heatmap" id="inspectorHeatmap"></div>
+      </section>
+
+      <div class="shortage-overview" id="shortageOverview" aria-label="รายการที่ไม่ครบแยกตามหมายเหตุ" hidden></div>
       <div class="info-grid" id="infoGrid">
         <section class="alerts-section" id="alertsSection" aria-label="แจ้งเตือน">
           <div class="section-heading">
@@ -90,10 +109,9 @@
           <p class="mobile-last-checked" id="lastCheckedTop">ยังไม่มีบันทึกการตรวจ</p>
         </div>
         <div class="inspection-bar">
-          <label>
-            ผู้ตรวจสอบ
-            <input id="inspectionInspector" type="text" placeholder="กรอกครั้งเดียวก่อนบันทึก" />
-          </label>
+          <label>วันที่ตรวจเช็ค <input id="inspectionDate" type="date" required /></label>
+          <label>ช่วงเวลา <select id="inspectionShift" required><option value="">เลือกเวร</option><option>เวรดึก</option><option>เวรเช้า</option><option>เวรบ่าย</option></select></label>
+          <label>ผู้ตรวจเช็ค <input id="inspectionInspector" type="text" list="inspectorOptions" placeholder="เพิ่มชื่อผู้ตรวจเช็ค" autocomplete="off" required /><datalist id="inspectorOptions"></datalist></label>
           <p id="lastChecked">ยังไม่มีบันทึกการตรวจ</p>
           <button class="primary-button" id="saveInspectionButton">บันทึกการตรวจ</button>
         </div>
@@ -110,18 +128,10 @@
               <option value="all">ทุกสถานะ</option>
               <option value="ok">พร้อมใช้</option>
               <option value="short">ต้องเติม</option>
+              <option value="unknown">ยังไม่ระบุจำนวนที่ต้องมี</option>
               <option value="expiring">ใกล้หมดอายุ</option>
               <option value="expired">หมดอายุ</option>
             </select>
-            <button class="secondary-button toolbar-icon-button" id="exportExcelButton" title="ส่งออก Excel" aria-label="ส่งออก Excel">XLS</button>
-            <button class="secondary-button toolbar-icon-button" id="exportButton" title="สำรอง JSON" aria-label="สำรอง JSON">{}</button>
-            <button class="secondary-button toolbar-icon-button" id="recoverItemsButton" title="กู้รายการที่หาย" aria-label="กู้รายการที่หาย">↺</button>
-            <button class="secondary-button toolbar-icon-button" id="resetSeedButton" title="โหลดจาก Excel" aria-label="โหลดจาก Excel">⇣</button>
-            <label class="secondary-button toolbar-icon-button import-label" title="นำเข้า" aria-label="นำเข้า">
-              ⇡
-              <input type="file" id="importFile" accept="application/json" />
-            </label>
-            <button class="primary-button toolbar-icon-button" id="addItemButton" title="เพิ่มรายการ" aria-label="เพิ่มรายการ">+</button>
           </div>
         </section>
         <div class="stock-list" id="stockList"></div>
@@ -230,7 +240,7 @@
       </article>
     </template>
 
-    <script src="./seed-data.js?v=20260606-12"></script>
-    <script src="./app.js?v=20260606-12"></script>
+    <script src="./seed-data.js?v=20260908-5"></script>
+    <script src="./app.js?v=20260908-15"></script>
   </body>
 </html>

@@ -1,16 +1,24 @@
-const UNITS = ["CPR Box", "ยารถ Emer", "รถ EMER adult", "รถ EMER ped"];
+const UNITS = ["Med Stock", "IV Fluid", "Equipment", "CPR Box", "Emer medicine", "Emer cart Adult", "Emer cart PED"];
 const UNIT_EXPIRY_WINDOWS = {
   "CPR Box": 180,
-  "ยารถ Emer": 180,
+  "Emer medicine": 180,
 };
+const UNIT_ALIASES = { "ยารถ Emer": "Emer medicine", "กล่องยา EMER": "Emer medicine", "รถ EMER adult": "Emer cart Adult", "รถ EMER ped": "Emer cart PED" };
+const INSPECTORS_KEY = "med-stock-inspectors-v1";
+const SHORTAGE_REASONS = ["รอเบิก", "ตามไม่ได้"];
+const EQUIPMENT_SHORTAGE_REASONS = ["ถูกยืม", "ส่งซ่อม"];
+const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่าย"];
 const STORAGE_KEY = "cute-med-stock-v3";
+const SOURCE_VERSION_KEY = "med-stock-source-version";
+const SOURCE_VERSION = window.SEED_SOURCE_VERSION || "";
 const SETTINGS_KEY = "cute-med-stock-settings-v1";
 const CHECK_LOG_KEY = "cute-med-stock-check-log-v1";
 const SIDEBAR_KEY = "cute-med-stock-sidebar-collapsed-v1";
 const DEFAULT_GOOGLE_SHEET_URL =
-  "https://script.google.com/macros/s/AKfycbzvois7VRC7USt8J4gHVuH9ggtScoN1gR5YPkL93kU80zwheqeAxyGVmvV7wF6JIEsSeg/exec";
+  "https://script.google.com/macros/s/AKfycbyHQUM1t-0XtfBQ6TyORkf3aT5vJdJfI4OUBU5LtK3WjH0hpPvcrrTz9KB0_1FY3D9S/exec";
 const LEGACY_GOOGLE_SHEET_URLS = [
   "https://script.googleusercontent.com/macros/echo",
+  "https://script.google.com/macros/s/AKfycbzvois7VRC7USt8J4gHVuH9ggtScoN1gR5YPkL93kU80zwheqeAxyGVmvV7wF6JIEsSeg/exec",
   "https://script.google.com/macros/s/AKfycbxsQjhgao4VfDHGKIWCl8koztnm5PYdUlfIuIPbWQrFhXYPiAa_h8PjN2R9sZW0bZiJsw/exec",
   "https://script.google.com/macros/s/AKfycbw6WrIkrFREWyRHoIpI7SPGyYMlkXLN957nXHBg-27P68SSgsRAinP3_uZMn01EFQTwyw/exec",
   "https://script.google.com/macros/s/AKfycbxiS2S8WqT-Abxs-wsy7fZH7SC8eX6JtJ8y-nOv9rJ22gChSQvhdQ-zP1Q_dB3wPnKyVA/exec",
@@ -22,15 +30,15 @@ const sampleData = {
     createSeed("Adrenaline 1 mg/ml", 10, 10, daysFromNow(45), "ระบบ"),
     createSeed("Syringe 10 ml", 20, 18, null, "ระบบ"),
   ],
-  "ยารถ Emer": [
+  "Emer medicine": [
     createSeed("Atropine 0.6 mg/ml", 6, 6, daysFromNow(20), "ระบบ"),
     createSeed("Dextrose 50%", 4, 3, daysFromNow(120), "ระบบ"),
   ],
-  "รถ EMER adult": [
+  "Emer cart Adult": [
     createSeed("Normal Saline 1000 ml", 6, 6, daysFromNow(200), "ระบบ"),
     createSeed("IV catheter No.18", 10, 10, null, "ระบบ"),
   ],
-  "รถ EMER ped": [
+  "Emer cart PED": [
     createSeed("Dopamine inj.", 3, 3, daysFromNow(14), "ระบบ"),
     createSeed("Pediatric ambu bag", 1, 1, null, "ระบบ"),
   ],
@@ -59,6 +67,7 @@ const els = {
   pageTitle: document.querySelector("#pageTitle"),
   pageSubtitle: document.querySelector("#pageSubtitle"),
   infoGrid: document.querySelector("#infoGrid"),
+  shortageOverview: document.querySelector("#shortageOverview"),
   stockSection: document.querySelector("#stockSection"),
   unitTitle: document.querySelector("#unitTitle"),
   lastChecked: document.querySelector("#lastChecked"),
@@ -67,15 +76,16 @@ const els = {
   expiringItems: document.querySelector("#expiringItems"),
   expiredItems: document.querySelector("#expiredItems"),
   shortItems: document.querySelector("#shortItems"),
-  addItemButton: document.querySelector("#addItemButton"),
-  exportButton: document.querySelector("#exportButton"),
-  exportExcelButton: document.querySelector("#exportExcelButton"),
-  recoverItemsButton: document.querySelector("#recoverItemsButton"),
-  resetSeedButton: document.querySelector("#resetSeedButton"),
-  importFile: document.querySelector("#importFile"),
+  monthlyReminder: document.querySelector("#monthlyReminder"),
+  dashboardInsights: document.querySelector("#dashboardInsights"),
+  dashboardCharts: document.querySelector("#dashboardCharts"),
+  inspectorHeatmap: document.querySelector("#inspectorHeatmap"),
   searchInput: document.querySelector("#searchInput"),
   sortSelect: document.querySelector("#sortSelect"),
   statusFilter: document.querySelector("#statusFilter"),
+  inspectionDate: document.querySelector("#inspectionDate"),
+  inspectionShift: document.querySelector("#inspectionShift"),
+  inspectorOptions: document.querySelector("#inspectorOptions"),
   inspectionInspector: document.querySelector("#inspectionInspector"),
   saveInspectionButton: document.querySelector("#saveInspectionButton"),
   sendTelegramButton: document.querySelector("#sendTelegramButton"),
@@ -104,11 +114,35 @@ const els = {
 init();
 
 function init() {
+  els.inspectionDate.value = localDate();
+  renderInspectors();
   syncSidebar();
   renderTabs();
   bindEvents();
   render();
   loadCloudState();
+}
+
+function localDate() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
+
+function fiscalYear(date) {
+  const [year, month] = date.split("-").map(Number);
+  return year + (month >= 10 ? 1 : 0) + 543;
+}
+
+function inspectorNames() {
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(INSPECTORS_KEY) || "[]"); } catch {}
+  return [...new Set([...(Array.isArray(saved) ? saved : []), ...checkLogs.map(log => log.inspector), ...getAllItems().map(item => item.inspector)].filter(name => typeof name === "string" && name.trim()).map(name => name.trim()))].sort((a,b) => a.localeCompare(b, "th"));
+}
+
+function renderInspectors(selected = els.inspectionInspector.value) {
+  const names = inspectorNames();
+  localStorage.setItem(INSPECTORS_KEY, JSON.stringify(names));
+  els.inspectorOptions.innerHTML = names.map(name => '<option value="' + escapeHtml(name) + '"></option>').join('');
+  els.inspectionInspector.value = selected || "";
 }
 
 function createSeed(name, requiredQty, countedQty, expiryDate, inspector) {
@@ -127,13 +161,17 @@ function hydrateSeed(seed) {
   const hydrated = {};
   UNITS.forEach((unit) => {
     hydrated[unit] = (seed[unit] || []).map((item) => ({
-      id: createId(),
+      id: item.sourceId || createId(),
+      sourceId: item.sourceId || "",
       name: item.name,
-      requiredQty: Number(item.requiredQty) || 0,
+      requiredQty: item.requiredQty == null ? null : Number(item.requiredQty),
       countedQty: Number(item.countedQty) || 0,
+      shortageReason: item.shortageReason || "",
       expiryDate: item.expiryDate || null,
       inspector: item.inspector || "",
       checkedAt: item.checkedAt || "",
+      inspectionDate: item.inspectionDate || "",
+      shift: item.shift || "",
     }));
   });
   return hydrated;
@@ -156,14 +194,20 @@ function loadData() {
 
   try {
     const parsed = JSON.parse(stored);
-    if (Array.isArray(parsed["กล่องยา EMER"]) && !Array.isArray(parsed["ยารถ Emer"])) {
-      parsed["ยารถ Emer"] = parsed["กล่องยา EMER"];
+    if (Array.isArray(parsed["กล่องยา EMER"]) && !Array.isArray(parsed["Emer medicine"])) {
+      parsed["Emer medicine"] = parsed["กล่องยา EMER"];
       delete parsed["กล่องยา EMER"];
     }
-    UNITS.forEach((unit) => {
-      if (!Array.isArray(parsed[unit])) parsed[unit] = [];
-    });
-    return parsed;
+
+    const normalized = normalizeImportedData(parsed);
+    if (SOURCE_VERSION && localStorage.getItem(SOURCE_VERSION_KEY) !== SOURCE_VERSION) {
+      backupBeforeSourceImport(normalized, "local");
+      const migrated = applySourceCatalog(normalized);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      localStorage.setItem(SOURCE_VERSION_KEY, SOURCE_VERSION);
+      return migrated;
+    }
+    return normalized;
   } catch {
     return cloneData(defaultData);
   }
@@ -171,6 +215,29 @@ function loadData() {
 
 function cloneData(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function backupBeforeSourceImport(previous, origin) {
+  const key = `med-stock-before-source-${SOURCE_VERSION}-${origin}`;
+  if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({ data: previous, backedUpAt: new Date().toISOString() }));
+}
+
+function applySourceCatalog(previous) {
+  const result = {};
+  const used = new Set();
+  UNITS.forEach(unit => {
+    // Match operational values to the same named item. The original CPR and
+    // medicine seed lists were reversed relative to the source sheet headings.
+    const alternate = unit === "CPR Box" ? "Emer medicine" : unit === "Emer medicine" ? "CPR Box" : null;
+    const candidates = [...(previous[unit] || []), ...(alternate ? previous[alternate] || [] : [])];
+    result[unit] = defaultData[unit].map(seed => {
+      const old = candidates.find(item => !used.has(item) && (item.sourceId === seed.sourceId || normalizeName(item.name) === normalizeName(seed.name)));
+      if (!old) return cloneData(seed);
+      used.add(old);
+      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: seed.requiredQty };
+    });
+  });
+  return result;
 }
 
 function loadSettings() {
@@ -195,7 +262,7 @@ function loadCheckLogs() {
 
   try {
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit })) : [];
   } catch {
     return [];
   }
@@ -203,6 +270,7 @@ function loadCheckLogs() {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(SOURCE_VERSION_KEY, SOURCE_VERSION);
   queueCloudStateSave();
 }
 
@@ -216,12 +284,6 @@ function saveCheckLogs() {
 }
 
 function bindEvents() {
-  els.addItemButton.addEventListener("click", () => openItemDialog());
-  els.exportButton.addEventListener("click", exportData);
-  els.exportExcelButton.addEventListener("click", exportExcel);
-  els.recoverItemsButton.addEventListener("click", recoverMissingItems);
-  els.resetSeedButton.addEventListener("click", resetFromExcelSeed);
-  els.importFile.addEventListener("change", importData);
   els.searchInput.addEventListener("input", () => {
     searchTerm = els.searchInput.value.trim().toLowerCase();
     renderStockList();
@@ -275,10 +337,10 @@ function renderTabs() {
     const button = document.createElement("button");
     button.className = "unit-tab";
     button.type = "button";
-    button.textContent = unit;
+    button.innerHTML = `${getUnitIcon(unit)}<span class="unit-label">${escapeHtml(unit)}</span>`;
+    button.setAttribute("aria-label", unit);
     button.title = unit;
     button.dataset.short = getUnitShortLabel(unit);
-    button.dataset.icon = getUnitIcon(unit);
     button.addEventListener("click", () => {
       activeUnit = unit;
       activeView = "unit";
@@ -286,6 +348,18 @@ function renderTabs() {
     });
     els.unitTabs.append(button);
   });
+  const dashboardButton = document.createElement("button");
+  dashboardButton.className = "unit-tab";
+  dashboardButton.type = "button";
+  dashboardButton.innerHTML = `${getUnitIcon("Dashboard")}<span class="unit-label">Dashboard</span>`;
+  dashboardButton.setAttribute("aria-label", "Dashboard");
+  dashboardButton.title = "Dashboard";
+  dashboardButton.dataset.view = "dashboard";
+  dashboardButton.addEventListener("click", () => {
+    activeView = "dashboard";
+    render();
+  });
+  els.unitTabs.append(dashboardButton);
 }
 
 function goHome() {
@@ -308,6 +382,11 @@ function changeMobileUnit() {
     goHome();
     return;
   }
+  if (value === "dashboard") {
+    activeView = "dashboard";
+    render();
+    return;
+  }
 
   activeUnit = value;
   activeView = "unit";
@@ -317,33 +396,46 @@ function changeMobileUnit() {
 function getUnitShortLabel(unit) {
   const labels = {
     "CPR Box": "CPR",
-    "ยารถ Emer": "ยา",
-    "รถ EMER adult": "Adult",
-    "รถ EMER ped": "Ped",
+    "Emer medicine": "ยา",
+    "Emer cart Adult": "Adult",
+    "Emer cart PED": "Ped",
   };
   return labels[unit] || unit.slice(0, 3);
 }
 
 function getUnitIcon(unit) {
   const icons = {
-    "CPR Box": "❤",
-    "ยารถ Emer": "𓊔",
-    "รถ EMER adult": "⚕",
-    "รถ EMER ped": "⚕",
+    "Med Stock": '<path d="m9 4-5 5a6.4 6.4 0 0 0 9 9l5-5a6.4 6.4 0 0 0-9-9Z"/><path d="m7 7 10 10"/>',
+    "IV Fluid": '<path d="M9 5V3h6v2M8 5h8a2 2 0 0 1 2 2v10H6V7a2 2 0 0 1 2-2ZM6 17h12M12 17v5"/><path d="M12 8s-2 2.2-2 3.5a2 2 0 0 0 4 0C14 10.2 12 8 12 8Z"/>',
+    "Equipment": '<rect x="2" y="4" width="20" height="15" rx="2"/><path d="M4 12h4l2-5 4 10 2-5h4M8 22h8M12 19v3"/>',
+    "CPR Box": '<path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+    "Emer medicine": '<path d="m14 3 7 7M17.5 6.5l-3 3M11 7l6 6M12 8l-8 8v4h4l8-8M6 18l-4 4M8 12l2 2M11 9l2 2"/>',
+    "Emer cart Adult": '<path d="M5 11V8a7 7 0 0 1 14 0v3M5 10c4 0 6-2 7-4 1 2 4 4 7 4v4a7 7 0 0 1-14 0Z"/><path d="M9 13h.01M15 13h.01M9 17q3 2 6 0"/>',
+    "Emer cart PED": '<path d="M5 10a7 7 0 0 1 14 0c4 0 4 6 0 6a7 7 0 0 1-14 0c-4 0-4-6 0-6Z"/><path d="M12 3c-3-3-5 1-2 3 2 1 4-1 3-2M9 12h.01M15 12h.01M9 16q3 3 6 0"/>',
+    "Dashboard": '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 16v-4M12 16V7M17 16v-7"/>',
   };
-  return icons[unit] || "•";
+  return `<svg class="unit-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[unit] || icons.Dashboard}</svg>`;
 }
 
 function render() {
+  document.body.classList.toggle("home-view", activeView === "home");
+  document.body.classList.toggle("dashboard-view", activeView === "dashboard");
   els.homeButton.classList.toggle("active", activeView === "home");
-  els.mobileUnitSelect.value = activeView === "home" ? "home" : activeUnit;
+  els.mobileUnitSelect.value = activeView === "unit" ? activeUnit : activeView;
   document.querySelectorAll(".unit-tab").forEach((button) => {
-    button.classList.toggle("active", activeView === "unit" && button.textContent === activeUnit);
+    button.classList.toggle("active", button.dataset.view === "dashboard"
+      ? activeView === "dashboard"
+      : activeView === "unit" && button.textContent === activeUnit);
   });
 
   renderPageHeader();
   els.infoGrid.hidden = activeView === "unit";
-  els.stockSection.hidden = activeView === "home";
+  els.shortageOverview.hidden = activeView !== "home";
+  els.monthlyReminder.hidden = activeView !== "home";
+  els.dashboardInsights.hidden = activeView !== "dashboard";
+  renderShortageOverview();
+  renderMonthlyReminder();
+  els.stockSection.hidden = activeView !== "unit";
   els.unitTitle.textContent = activeUnit;
   renderDashboard();
   renderAlerts();
@@ -352,8 +444,8 @@ function render() {
 }
 
 function renderPageHeader() {
-  if (activeView === "home") {
-    els.pageTitle.textContent = "ระบบจัดการสต๊อกยาและเวชภัณฑ์";
+  if (activeView !== "unit") {
+    els.pageTitle.textContent = activeView === "home" ? "Home" : "Dashboard";
     els.pageSubtitle.textContent = "เช็คง่าย แก้เลขไว แจ้งเตือนของใกล้หมดอายุ";
     return;
   }
@@ -366,7 +458,35 @@ function getAllItems() {
   return UNITS.flatMap((unit) => data[unit].map((item) => ({ ...item, unit })));
 }
 
+function shortageReasons(unit) {
+  return unit === "Equipment" ? EQUIPMENT_SHORTAGE_REASONS : SHORTAGE_REASONS;
+}
+
+function shortageReason(item, unit = item.unit || activeUnit) {
+  return Number(item.countedQty) < Number(item.requiredQty) && shortageReasons(unit).includes(item.shortageReason) ? item.shortageReason : "";
+}
+
+function renderShortageOverview() {
+  const items = getAllItems();
+  const groups = [
+    { reason: "รอเบิก", tone: "amber", icon: '<path d="M5 7h14v13H5zM9 7V4h6v3M9 12h6M12 9v6"/>' },
+    { reason: "ตามไม่ได้", tone: "rose", icon: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M8.5 8.5l4 4m0-4-4 4"/>' },
+    { reason: "ถูกยืม", tone: "blue", icon: '<path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4"/>' },
+    { reason: "ส่งซ่อม", tone: "violet", icon: '<path d="M14 4a6 6 0 0 0-7 8L3 16a3 3 0 0 0 5 5l4-4a6 6 0 0 0 8-7l-4 3-4-4z"/>' },
+  ];
+  els.shortageOverview.innerHTML = groups.map(({ reason, tone, icon }) => {
+    const matches = items.filter(item => shortageReason(item) === reason);
+    return `<section class="shortage-group shortage-${tone}" aria-label="${reason}">
+      <div class="shortage-card-head"><span class="shortage-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></span><h2>${reason}</h2></div>
+      <div class="shortage-count"><strong>${matches.length}</strong><span>รายการ</span></div>
+      <div class="shortage-card-body">${matches.length
+      ? matches.map(item => `<article class="shortage-entry"><strong>${escapeHtml(item.name)}</strong><div class="shortage-entry-meta"><span>${escapeHtml(item.unit)} · มี ${escapeHtml(item.countedQty)}/${escapeHtml(item.requiredQty)}</span><span class="shortage-deficit">ขาด ${Number(item.requiredQty) - Number(item.countedQty)}</span></div></article>`).join("")
+      : '<div class="shortage-empty"><span aria-hidden="true">—</span>ไม่มีรายการ</div>'}</div></section>`;
+  }).join("");
+}
+
 function getItemStatus(item, unit = item.unit || activeUnit) {
+  if (item.requiredQty == null) return { key: "unknown", label: "ยังไม่ระบุจำนวนที่ต้องมี" };
   if (Number(item.countedQty) < Number(item.requiredQty)) return { key: "short", label: "ต้องเติม" };
   if (!item.expiryDate) return { key: "ok", label: "พร้อมใช้" };
 
@@ -389,13 +509,83 @@ function daysUntil(dateValue) {
 
 function renderDashboard() {
   const items =
-    activeView === "home"
+    activeView !== "unit"
       ? getAllItems()
       : data[activeUnit].map((item) => ({ ...item, unit: activeUnit }));
   els.totalItems.textContent = items.length;
   els.expiringItems.textContent = items.filter((item) => getItemStatus(item, item.unit).key === "expiring").length;
   els.expiredItems.textContent = items.filter((item) => getItemStatus(item, item.unit).key === "expired").length;
   els.shortItems.textContent = items.filter((item) => getItemStatus(item, item.unit).key === "short").length;
+  renderDashboardInsights();
+}
+
+function itemDashboardBucket(item, unit) {
+  if (item.requiredQty == null) return "missing";
+  if (Number(item.countedQty) >= Number(item.requiredQty)) return "complete";
+  if (shortageReason(item, unit) === "รอเบิก") return "waiting";
+  return "missing";
+}
+
+function dashboardPieStyle(counts) {
+  const total = Math.max(1, counts.complete + counts.waiting + counts.missing);
+  const complete = (counts.complete / total) * 360;
+  const waiting = complete + (counts.waiting / total) * 360;
+  return `conic-gradient(var(--mint) 0 ${complete}deg, var(--yellow) ${complete}deg ${waiting}deg, var(--magenta) ${waiting}deg 360deg)`;
+}
+
+function renderDashboardInsights() {
+  if (activeView !== "dashboard") return;
+  els.dashboardCharts.innerHTML = UNITS.map((unit) => {
+    const counts = data[unit].reduce((total, item) => {
+      total[itemDashboardBucket(item, unit)] += 1;
+      return total;
+    }, { complete: 0, waiting: 0, missing: 0 });
+    const total = counts.complete + counts.waiting + counts.missing;
+    return `<article class="pie-card">
+      <div class="pie-chart" style="background:${dashboardPieStyle(counts)}"><span>${total}</span></div>
+      <div class="pie-card-main">
+        <h3>${escapeHtml(unit)}</h3>
+        <div class="pie-legend">
+          <span><i class="legend-complete"></i>ครบ ${counts.complete}</span>
+          <span><i class="legend-waiting"></i>รอเบิก ${counts.waiting}</span>
+          <span><i class="legend-missing"></i>หาไม่พบ ${counts.missing}</span>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+
+  const counts = new Map();
+  checkLogs.forEach((log) => {
+    const name = String(log.inspector || "").trim();
+    if (name) counts.set(name, (counts.get(name) || 0) + 1);
+  });
+  const rows = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "th")).slice(0, 18);
+  const max = Math.max(1, ...rows.map((row) => row[1]));
+  els.inspectorHeatmap.innerHTML = rows.length
+    ? rows.map(([name, count]) => {
+      const level = Math.max(1, Math.ceil((count / max) * 5));
+      return `<article class="heatmap-cell heat-${level}"><strong>${escapeHtml(name)}</strong><span>${count} ครั้ง</span></article>`;
+    }).join("")
+    : '<div class="empty-state">ยังไม่มีประวัติผู้ตรวจเช็ค</div>';
+}
+
+function renderMonthlyReminder() {
+  if (activeView !== "home") return;
+  const today = localDate();
+  if (today.slice(-2) !== "01") {
+    els.monthlyReminder.innerHTML = "";
+    els.monthlyReminder.hidden = true;
+    return;
+  }
+  const emergencyUnits = ["Emer cart Adult", "Emer cart PED", "CPR Box", "Emer medicine"];
+  const items = emergencyUnits.flatMap((unit) => data[unit].map((item) => ({ ...item, unit })));
+  const expiring = items.filter((item) => ["expiring", "expired"].includes(getItemStatus(item, item.unit).key));
+  els.monthlyReminder.hidden = false;
+  els.monthlyReminder.innerHTML = `<div class="monthly-reminder-card">
+    <strong>อย่าลืมเช็ควันหมดอายุ</strong>
+    <span>วันนี้วันที่ 1 ของเดือน ตรวจวันหมดอายุ Emer cart Adult, Emer cart PED, CPR Box และ Emer medicine</span>
+    <small>${expiring.length ? `พบรายการใกล้หมดอายุ/หมดอายุ ${expiring.length} รายการ` : "ยังไม่พบรายการใกล้หมดอายุในรอบนี้"}</small>
+  </div>`;
 }
 
 function renderAlerts() {
@@ -431,7 +621,7 @@ function renderCheckLog() {
     row.innerHTML = `
       <div>
         <strong>${escapeHtml(log.unit)}</strong>
-        <span>${escapeHtml(log.inspector || "-")} · ${formatDateTime(log.checkedAt)} · ${log.totalItems} รายการ</span>
+        <span>${escapeHtml(log.inspector || "-")} · ${log.inspectionDate ? formatDate(log.inspectionDate) : formatDateTime(log.checkedAt)} · ${escapeHtml(log.shift || "ไม่ระบุเวร")} · ${log.totalItems} รายการ</span>
         <small>ต่ำกว่าเกณฑ์ ${log.shortCount} · ใกล้หมดอายุ ${log.expiringCount} · หมดอายุแล้ว ${log.expiredCount}</small>
       </div>
       <span class="check-log-status ${log.shortCount || log.expiringCount || log.expiredCount ? "warning" : ""}">บันทึกแล้ว</span>
@@ -440,7 +630,7 @@ function renderCheckLog() {
   });
 }
 
-function addCheckLog(unit, inspector, checkedAt) {
+function addCheckLog(unit, inspector, checkedAt, inspectionDate, shift) {
   const items = data[unit].map((item) => ({ ...item, unit }));
   const shortCount = items.filter((item) => Number(item.countedQty) < Number(item.requiredQty)).length;
   const expiringCount = items.filter((item) => getItemStatus(item, unit).key === "expiring").length;
@@ -449,6 +639,9 @@ function addCheckLog(unit, inspector, checkedAt) {
   checkLogs.unshift({
     id: createId(),
     checkedAt,
+    inspectionDate,
+    shift,
+    fiscalYear: fiscalYear(inspectionDate),
     unit,
     inspector,
     totalItems: items.length,
@@ -461,6 +654,7 @@ function addCheckLog(unit, inspector, checkedAt) {
       countedQty: item.countedQty,
       expiryDate: item.expiryDate,
       status: getItemStatus(item, unit).label,
+      shortageReason: shortageReason(item),
     })),
   });
   checkLogs = checkLogs.slice(0, 200);
@@ -475,7 +669,8 @@ function getAlerts() {
 
 function alertText(item) {
   const status = getItemStatus(item);
-  if (status.key === "short") return `มี ${item.countedQty}/${item.requiredQty}`;
+  if (status.key === "unknown") return "ยังไม่ระบุจำนวนที่ต้องมีในชีทต้นฉบับ";
+  if (status.key === "short") return `มี ${item.countedQty}/${item.requiredQty}${shortageReason(item) ? " · " + shortageReason(item) : ""}`;
   if (status.key === "expired") return `หมดอายุ ${formatDate(item.expiryDate)}`;
   return `เหลือ ${daysUntil(item.expiryDate)} วัน`;
 }
@@ -493,7 +688,7 @@ function renderStockList() {
     .sort((a, b) => String(a.checkedAt).localeCompare(String(b.checkedAt)))
     .at(-1);
   const lastCheckedText = latestItem
-    ? `ตรวจล่าสุด ${formatDateTime(latestItem.checkedAt)} โดย ${latestItem.inspector || "-"}`
+    ? `ตรวจล่าสุด ${latestItem.inspectionDate ? formatDate(latestItem.inspectionDate) : formatDateTime(latestItem.checkedAt)} ${latestItem.shift || ""} โดย ${latestItem.inspector || "-"}`
     : "ยังไม่มีบันทึกการตรวจ";
   els.lastChecked.textContent = lastCheckedText;
   els.lastCheckedTop.textContent = lastCheckedText;
@@ -533,8 +728,9 @@ function renderStockList() {
       <td>
         <strong>${escapeHtml(item.name)}</strong>
         <span>${escapeHtml(activeUnit)}</span>
+        ${Number(item.countedQty) < Number(item.requiredQty) ? `<label class="shortage-label">หมายเหตุ<select class="shortage-select" aria-label="หมายเหตุ ${escapeHtml(item.name)}"><option value="">เลือกหมายเหตุ</option>${shortageReasons(activeUnit).map(reason => `<option${shortageReason(item) === reason ? " selected" : ""}>${reason}</option>`).join("")}</select></label>` : ""}
       </td>
-      <td class="number-cell">${escapeHtml(item.requiredQty)}</td>
+      <td class="number-cell">${item.requiredQty == null ? "ยังไม่ระบุ" : escapeHtml(item.requiredQty)}</td>
       <td>
         <div class="qty-editor table-qty-editor" aria-label="แก้ไขจำนวน">
           <button class="qty-button decrease" type="button">−</button>
@@ -554,6 +750,11 @@ function renderStockList() {
     row.querySelector(".decrease").addEventListener("click", () => updateQty(item.id, Math.max(0, Number(item.countedQty) - 1)));
     row.querySelector(".increase").addEventListener("click", () => updateQty(item.id, Number(item.countedQty) + 1));
     row.querySelector(".edit-button").addEventListener("click", () => openItemDialog(item));
+    row.querySelector(".shortage-select")?.addEventListener("change", event => {
+      item.shortageReason = event.target.value;
+      saveData();
+      render();
+    });
 
     body.append(row);
   });
@@ -597,41 +798,37 @@ function updateQty(id, nextQty) {
   const item = data[activeUnit].find((entry) => entry.id === id);
   if (!item) return;
   item.countedQty = Math.max(0, Number(nextQty) || 0);
+  if (item.countedQty >= Number(item.requiredQty)) item.shortageReason = "";
   saveData();
   render();
 }
 
 async function saveInspection() {
   const inspector = els.inspectionInspector.value.trim();
-  if (!inspector) {
-    els.inspectionInspector.focus();
-    alert("กรุณากรอกชื่อผู้ตรวจสอบก่อนบันทึก");
+  const inspectionDate = els.inspectionDate.value;
+  const shift = els.inspectionShift.value;
+  if (!inspector || !inspectionDate || !SHIFTS.includes(shift) || !els.inspectionDate.checkValidity()) {
+    alert("กรุณาระบุวันที่ตรวจเช็ค เวร และชื่อผู้ตรวจเช็คให้ครบ");
     return;
   }
-
+  const unit = activeUnit;
   const checkedAt = new Date().toISOString();
-  data[activeUnit].forEach((item) => {
-    item.inspector = inspector;
-    item.checkedAt = checkedAt;
-  });
-  const checkLog = addCheckLog(activeUnit, inspector, checkedAt);
+  data[unit].forEach(item => Object.assign(item, { inspector, checkedAt, inspectionDate, shift }));
+  const checkLog = addCheckLog(unit, inspector, checkedAt, inspectionDate, shift);
+  const telegramMessage = buildInspectionMessage(unit, inspector, checkedAt) + "\nวันที่ตรวจ: " + formatDate(inspectionDate) + " · " + shift + " · ปีงบประมาณ " + fiscalYear(inspectionDate);
   saveData();
+  renderInspectors(inspector);
+  els.inspectionInspector.value = "";
   render();
-  showToast("บันทึกสำเร็จ");
-
-  const googleSheetSent = settings.googleSheetUrl ? await sendInspectionToGoogleSheet(checkLog) : null;
-  const telegramSent = canSendTelegram() ? await notifyInspection(activeUnit, inspector, checkedAt) : null;
-  const results = [`บันทึกการตรวจ ${activeUnit} เรียบร้อยแล้ว`];
-
-  if (googleSheetSent === true) results.push("ส่ง Google Sheet แล้ว");
-  else if (googleSheetSent === false) results.push("ส่ง Google Sheet ไม่สำเร็จ");
-  else results.push("ยังไม่ได้ตั้งค่า Google Sheet");
-
-  if (telegramSent === true) results.push("ส่ง Telegram แล้ว");
-  else if (telegramSent === false) results.push("ส่ง Telegram ไม่สำเร็จ");
-  else results.push("ยังไม่ได้ตั้งค่า Telegram");
-
-  console.info(results.join("\n"));
+  showToast("บันทึกในเครื่องสำเร็จ กำลังส่ง Google Sheet");
+  els.saveInspectionButton.disabled = true;
+  try {
+    const sent = await sendInspectionToGoogleSheet(checkLog);
+    if (canSendTelegram()) await sendTelegramMessage(telegramMessage);
+    showToast(sent ? "บันทึก Google Sheet สำเร็จ · ปีงบประมาณ " + checkLog.fiscalYear : "บันทึกในเครื่องแล้ว แต่ยังยืนยัน Google Sheet ไม่ได้");
+  } finally {
+    els.saveInspectionButton.disabled = false;
+  }
 }
 
 function openItemDialog(item = null) {
@@ -639,7 +836,7 @@ function openItemDialog(item = null) {
   els.dialogTitle.textContent = editing ? "แก้ไขรายการ" : "เพิ่มรายการ";
   els.editingId.value = item?.id || "";
   els.itemName.value = item?.name || "";
-  els.requiredQty.value = item?.requiredQty ?? 1;
+  els.requiredQty.value = item ? item.requiredQty ?? "" : 1;
   els.countedQty.value = item?.countedQty ?? 0;
   els.noExpiry.checked = !item?.expiryDate;
   els.expiryDate.value = item?.expiryDate || "";
@@ -666,7 +863,12 @@ function saveItem(event) {
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
     inspector: existingItem?.inspector || "",
     checkedAt: existingItem?.checkedAt || "",
+    inspectionDate: existingItem?.inspectionDate || "",
+    shift: existingItem?.shift || "",
+    shortageReason: existingItem?.shortageReason || "",
+    sourceId: existingItem?.sourceId || "",
   };
+  if (nextItem.countedQty >= nextItem.requiredQty) nextItem.shortageReason = "";
 
   const index = data[activeUnit].findIndex((item) => item.id === id);
   if (index >= 0) data[activeUnit][index] = nextItem;
@@ -679,7 +881,8 @@ function saveItem(event) {
 }
 
 function resetFromExcelSeed() {
-  if (!confirm("โหลดรายการและจำนวนที่ต้องมีจาก Excel ใหม่? ข้อมูลที่แก้ไว้ในหน้านี้จะถูกแทนที่")) return;
+  if (!confirm("โหลดรายการและจำนวนที่ต้องมีจากชีทต้นฉบับใหม่ทุกหน้า? จำนวนที่นับ วันหมดอายุ และข้อมูลการตรวจปัจจุบันจะถูกแทนที่")) return;
+  backupBeforeSourceImport(data, `reset-${Date.now()}`);
   data = cloneData(defaultData);
   saveData();
   searchTerm = "";
@@ -692,11 +895,12 @@ function resetFromExcelSeed() {
 function recoverMissingItems() {
   let recoveredCount = 0;
   UNITS.forEach((unit) => {
-    const existingNames = new Set(data[unit].map((item) => normalizeName(item.name)));
+    const existingNames = new Set(data[unit].map((item) => item.sourceId || normalizeName(item.name)));
     defaultData[unit].forEach((seedItem) => {
-      if (existingNames.has(normalizeName(seedItem.name))) return;
-      data[unit].push({ ...cloneData(seedItem), id: createId(), countedQty: seedItem.requiredQty });
-      existingNames.add(normalizeName(seedItem.name));
+      const key = seedItem.sourceId || normalizeName(seedItem.name);
+      if (existingNames.has(key)) return;
+      data[unit].push({ ...cloneData(seedItem), id: createId() });
+      existingNames.add(key);
       recoveredCount++;
     });
   });
@@ -707,7 +911,7 @@ function recoverMissingItems() {
   els.searchInput.value = "";
   els.statusFilter.value = "all";
   render();
-  alert(recoveredCount ? `กู้รายการกลับมาแล้ว ${recoveredCount} รายการ` : "ไม่พบรายการที่หายไปจาก Excel");
+  alert(recoveredCount ? `กู้รายการกลับมาแล้ว ${recoveredCount} รายการ` : "ไม่พบรายการที่หายไปจากชีทต้นฉบับ");
 }
 
 function normalizeName(name) {
@@ -811,7 +1015,9 @@ async function sendInspectionToGoogleSheet(checkLog) {
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
     });
-    return response.ok;
+    if (!response.ok) return false;
+    const result = await response.json();
+    return result.ok === true;
   } catch {
     try {
       await fetch(url, {
@@ -820,7 +1026,8 @@ async function sendInspectionToGoogleSheet(checkLog) {
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
       });
-      return true;
+      const receipt = await jsonpRequest(url, { action: "inspectionReceipt", id: checkLog.id, fiscalYear: checkLog.fiscalYear });
+      return receipt?.ok === true && receipt.saved === true;
     } catch {
       return false;
     }
@@ -838,10 +1045,12 @@ async function saveCloudState() {
 
   const payload = {
     action: "saveState",
+    sourceVersion: SOURCE_VERSION,
     source: "med-stock",
     updatedAt: new Date().toISOString(),
     data,
     checkLogs,
+    inspectors: inspectorNames(),
   };
 
   try {
@@ -864,11 +1073,18 @@ async function loadCloudState() {
     const response = await jsonpRequest(settings.googleSheetUrl, { action: "loadState" });
     if (!response?.ok || !response.state?.data) return;
 
-    const nextData = normalizeImportedData(response.state.data);
+    let nextData = normalizeImportedData(response.state.data);
+    if (SOURCE_VERSION && response.state.sourceVersion !== SOURCE_VERSION) {
+      backupBeforeSourceImport(nextData, "cloud");
+      nextData = applySourceCatalog(nextData);
+    }
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
     cloudSyncPaused = true;
     data = nextData;
-    checkLogs = nextCheckLogs;
+    checkLogs = nextCheckLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
+    const names = [...inspectorNames(), ...(response.state.inspectors || [])];
+    localStorage.setItem(INSPECTORS_KEY, JSON.stringify(names));
+    renderInspectors();
     saveData();
     saveCheckLogs();
     cloudSyncPaused = false;
@@ -915,7 +1131,14 @@ function jsonpRequest(url, params = {}) {
 function normalizeImportedData(importedData) {
   const normalized = {};
   UNITS.forEach((unit) => {
-    normalized[unit] = Array.isArray(importedData?.[unit]) ? importedData[unit] : [];
+    const keys = [unit, ...Object.keys(UNIT_ALIASES).filter(key => UNIT_ALIASES[key] === unit)];
+    const seen = new Set();
+    normalized[unit] = keys.flatMap(key => Array.isArray(importedData?.[key]) ? importedData[key] : []).filter(item => {
+      const identity = item.id || item.name;
+      if (seen.has(identity)) return false;
+      seen.add(identity);
+      return true;
+    });
   });
   return normalized;
 }
@@ -1076,7 +1299,7 @@ function buildTelegramMessage() {
 
 function exportExcel() {
   const rows = [
-    ["หน่วย", "ชื่อยา/เวชภัณฑ์", "จำนวนที่ต้องมี", "จำนวนที่นับได้", "วันหมดอายุ", "ผู้ตรวจสอบ", "วันที่ตรวจเช็ค", "สถานะ"],
+    ["หน่วย", "ชื่อยา/เวชภัณฑ์", "จำนวนที่ต้องมี", "จำนวนที่นับได้", "วันหมดอายุ", "ผู้ตรวจสอบ", "วันที่ตรวจเช็ค", "เวร", "ปีงบประมาณ", "สถานะ"],
   ];
 
   getAllItems().forEach((item) => {
@@ -1088,7 +1311,9 @@ function exportExcel() {
       item.countedQty,
       item.expiryDate ? formatDate(item.expiryDate) : "ไม่มีวันหมดอายุ",
       item.inspector || "",
-      item.checkedAt ? formatDateTime(item.checkedAt) : "",
+      item.inspectionDate || (item.checkedAt ? formatDateTime(item.checkedAt) : ""),
+      item.shift || "",
+      item.inspectionDate ? fiscalYear(item.inspectionDate) : "",
       status.label,
     ]);
   });
@@ -1104,22 +1329,22 @@ ${rows
 </table>
 <br>
 <table border="1">
-<tr><td>ประวัติการเช็คสต๊อก</td><td>เวลา</td><td>หน่วย</td><td>ผู้ตรวจสอบ</td><td>รายการทั้งหมด</td><td>ต่ำกว่าเกณฑ์</td><td>ใกล้หมดอายุ</td><td>หมดอายุแล้ว</td></tr>
+<tr><td>ประวัติการเช็คสต๊อก</td><td>เวลาบันทึก</td><td>วันที่ตรวจเช็ค</td><td>เวร</td><td>ปีงบประมาณ</td><td>หน่วย</td><td>ผู้ตรวจสอบ</td><td>รายการทั้งหมด</td><td>ต่ำกว่าเกณฑ์</td><td>ใกล้หมดอายุ</td><td>หมดอายุแล้ว</td></tr>
 ${checkLogs
   .map(
     (log) =>
-      `<tr><td>${escapeHtml(log.id)}</td><td>${escapeHtml(formatDateTime(log.checkedAt))}</td><td>${escapeHtml(log.unit)}</td><td>${escapeHtml(log.inspector)}</td><td>${escapeHtml(log.totalItems)}</td><td>${escapeHtml(log.shortCount)}</td><td>${escapeHtml(log.expiringCount)}</td><td>${escapeHtml(log.expiredCount)}</td></tr>`
+      `<tr><td>${escapeHtml(log.id)}</td><td>${escapeHtml(formatDateTime(log.checkedAt))}</td><td>${escapeHtml(log.inspectionDate || "")}</td><td>${escapeHtml(log.shift || "")}</td><td>${escapeHtml(log.fiscalYear || "")}</td><td>${escapeHtml(log.unit)}</td><td>${escapeHtml(log.inspector)}</td><td>${escapeHtml(log.totalItems)}</td><td>${escapeHtml(log.shortCount)}</td><td>${escapeHtml(log.expiringCount)}</td><td>${escapeHtml(log.expiredCount)}</td></tr>`
   )
   .join("")}
 </table>
 <br>
 <table border="1">
-<tr><td>รายละเอียดประวัติการเช็ค</td><td>เวลา</td><td>หน่วย</td><td>ผู้ตรวจสอบ</td><td>ชื่อรายการ</td><td>จำนวนที่ต้องมี</td><td>จำนวนที่นับได้</td><td>วันหมดอายุ</td><td>สถานะ</td></tr>
+<tr><td>รายละเอียดประวัติการเช็ค</td><td>เวลาบันทึก</td><td>วันที่ตรวจเช็ค</td><td>เวร</td><td>ปีงบประมาณ</td><td>หน่วย</td><td>ผู้ตรวจสอบ</td><td>ชื่อรายการ</td><td>จำนวนที่ต้องมี</td><td>จำนวนที่นับได้</td><td>วันหมดอายุ</td><td>สถานะ</td></tr>
 ${checkLogs
   .flatMap((log) =>
     (log.items || []).map(
       (item) =>
-        `<tr><td>${escapeHtml(log.id)}</td><td>${escapeHtml(formatDateTime(log.checkedAt))}</td><td>${escapeHtml(log.unit)}</td><td>${escapeHtml(log.inspector)}</td><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.requiredQty)}</td><td>${escapeHtml(item.countedQty)}</td><td>${escapeHtml(item.expiryDate || "ไม่มีวันหมดอายุ")}</td><td>${escapeHtml(item.status)}</td></tr>`
+        `<tr><td>${escapeHtml(log.id)}</td><td>${escapeHtml(formatDateTime(log.checkedAt))}</td><td>${escapeHtml(log.inspectionDate || "")}</td><td>${escapeHtml(log.shift || "")}</td><td>${escapeHtml(log.fiscalYear || "")}</td><td>${escapeHtml(log.unit)}</td><td>${escapeHtml(log.inspector)}</td><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.requiredQty)}</td><td>${escapeHtml(item.countedQty)}</td><td>${escapeHtml(item.expiryDate || "ไม่มีวันหมดอายุ")}</td><td>${escapeHtml(item.status)}</td></tr>`
     )
   )
   .join("")}
@@ -1146,7 +1371,7 @@ function escapeHtml(value) {
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify({ data, checkLogs, settings: { expiryWindow: settings.expiryWindow } }, null, 2)], {
+  const blob = new Blob([JSON.stringify({ data, sourceVersion: SOURCE_VERSION, checkLogs, inspectors: inspectorNames(), settings: { expiryWindow: settings.expiryWindow } }, null, 2)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(blob);
@@ -1167,12 +1392,14 @@ function importData(event) {
       const parsed = JSON.parse(String(reader.result));
       const importedData = normalizeImportedData(parsed.data || parsed);
       data = importedData;
+      localStorage.setItem(INSPECTORS_KEY, JSON.stringify([...inspectorNames(), ...(Array.isArray(parsed.inspectors) ? parsed.inspectors : [])]));
       if (Array.isArray(parsed.checkLogs)) {
-        checkLogs = parsed.checkLogs;
+        checkLogs = parsed.checkLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
         saveCheckLogs();
       }
       saveData();
       render();
+      renderInspectors();
       alert("นำเข้าข้อมูลเรียบร้อยแล้ว");
     } catch {
       alert("ไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์ที่ส่งออกจากระบบนี้");
