@@ -286,6 +286,17 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
+      "sourceId": "equipment-fridge-temperature",
+      "name": "อุณหภูมิตู้เย็น",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "equipmentStatus": "พร้อมใช้",
+      "temperature": 4,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
       "sourceId": "rn-source-12-3",
       "name": "Infusion pump",
       "requiredQty": 11,

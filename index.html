@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ระบบจัดการสต๊อกยาและเวชภัณฑ์</title>
+    <title>Medication &amp; Supply Stock</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230F4267'/%3E%3Cg transform='rotate(-35 32 32)'%3E%3Crect x='14' y='22' width='36' height='20' rx='10' fill='%23FFCAC9'/%3E%3Cpath d='M32 22h8a10 10 0 0 1 0 20h-8z' fill='%23D273FF'/%3E%3Cpath d='M32 23v18' stroke='%23FFFDF7' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css?v=20260908-17" />
   </head>
   <body>
@@ -11,8 +12,16 @@
       <aside class="unit-sidebar" aria-label="เลือกหน่วยงาน">
         <div class="sidebar-top">
           <div class="brand-lockup">
-            <span class="brand-mark" aria-hidden="true">⚕</span>
-            <strong class="sidebar-text">Med Stock</strong>
+            <span class="brand-mark" aria-hidden="true">
+              <svg class="brand-pill-icon" viewBox="0 0 64 64" focusable="false">
+                <g transform="rotate(-35 32 32)">
+                  <rect x="12" y="22" width="40" height="20" rx="10"></rect>
+                  <path d="M32 22h10a10 10 0 0 1 0 20H32z"></path>
+                  <path d="M32 23v18"></path>
+                </g>
+              </svg>
+            </span>
+            <strong class="sidebar-text">Medication &amp; Supply Stock</strong>
           </div>
           <div class="sidebar-actions">
             <button class="icon-button" id="sidebarToggle" title="หุบเมนู" aria-label="หุบเมนู" aria-expanded="true">
@@ -174,6 +183,21 @@
           <input id="expiryDate" type="date" />
         </label>
 
+        <div class="equipment-fields" id="equipmentFields" hidden>
+          <label>
+            สถานะ
+            <select id="equipmentStatus">
+              <option value="พร้อมใช้">พร้อมใช้</option>
+              <option value="ส่งซ่อม">ส่งซ่อม</option>
+            </select>
+          </label>
+
+          <label>
+            อุณหภูมิ (°C)
+            <input id="temperature" type="number" min="0" max="5" step="0.01" placeholder="0.00-5.00" />
+          </label>
+        </div>
+
         <div class="modal-actions">
           <button class="danger-button" id="deleteItemButton" type="button">ลบ</button>
           <div>
@@ -242,6 +266,6 @@
     </template>
 
     <script src="./seed-data.js?v=20260908-5"></script>
-    <script src="./app.js?v=20260908-17"></script>
+    <script src="./app.js?v=20260911-1"></script>
   </body>
 </html>

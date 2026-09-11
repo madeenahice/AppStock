@@ -6,6 +6,7 @@ const TELEGRAM_CHAT_ID = "-5176019871";
 const UNITS = ["CPR Box", "Emer medicine", "Emer cart Adult", "Emer cart PED", "Med Stock", "IV Fluid", "Equipment"];
 const ALIASES = { "ยารถ Emer": "Emer medicine", "รถ EMER adult": "Emer cart Adult", "รถ EMER ped": "Emer cart PED" };
 const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่าย"];
+const INSPECTION_LOG_HEADERS = ["วันที่ตรวจเช็ค", "ช่วงเวลา", "ปีงบประมาณ", "ชื่อผู้ตรวจ", "หน่วย", "Log ID", "เวลาบันทึก"];
 
 function spreadsheet() { return SpreadsheetApp.openById(SPREADSHEET_ID); }
 function fiscalYear(date) {
@@ -46,6 +47,7 @@ function doPost(e) {
     const payload = JSON.parse(e.postData.contents || "{}");
     if (payload.action === "sendTelegram") return jsonResponse(sendTelegram(payload));
     lock.waitLock(30000);
+    if (payload.action === "clearState") { clearState(); return jsonResponse({ ok: true }); }
     if (payload.action === "saveState") { saveState(payload); return jsonResponse({ ok: true }); }
     return jsonResponse(saveInspection(payload));
   } catch (error) { return jsonResponse({ ok: false, error: error.message }); }
@@ -61,12 +63,37 @@ function saveInspection(payload) {
   const book = spreadsheet();
   const summary = getOrCreateSheet(book, "Inspection Logs " + year, ["Log ID", "Checked At", "Inspection Date", "Shift", "Fiscal Year (BE)", "Unit", "Inspector", "Total Items", "Short Count", "Expiring Count", "Expired Count"]);
   if (hasLog(summary, log.id)) return { ok: true, logId: log.id, fiscalYear: year };
-  const details = getOrCreateSheet(book, unit + " " + year, ["วันที่ตรวจเช็ค", "ช่วงเวลา", "ปีงบประมาณ", "ชื่อผู้ตรวจ", "รายการ", "จำนวน", "วันหมดอายุ"]);
+  const items = log.items || [];
+  const details = getWideInspectionSheet(book, unit + " " + year, items);
   const summaryPrefix = [log.id, log.checkedAt || "", inspectionDate, log.shift, year, unit, log.inspector];
-  if (!hasLog(details, log.id)) appendRows(details, (log.items || []).map(item => [inspectionDate, log.shift, year, log.inspector, item.name || "", item.countedQty ?? 0, item.expiryDate || ""]));
+  appendRows(details, [wideInspectionRow(items, log, unit, year)]);
   appendRows(summary, [[...summaryPrefix, log.totalItems ?? 0, log.shortCount ?? 0, log.expiringCount ?? 0, log.expiredCount ?? 0]]);
   SpreadsheetApp.flush();
   return { ok: true, logId: log.id, fiscalYear: year };
+}
+
+function itemHeaders(items) {
+  return (items || []).flatMap(item => {
+    const name = item.name || "รายการ";
+    return [name + " จำนวน", name + " วันหมดอายุ"];
+  });
+}
+
+function getWideInspectionSheet(book, name, items) {
+  const headers = [...itemHeaders(items), ...INSPECTION_LOG_HEADERS];
+  const sheet = book.getSheetByName(name) || book.insertSheet(name);
+  if (!sheet.getLastRow()) {
+    sheet.appendRow(headers);
+    sheet.setFrozenRows(1);
+  } else {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+  return sheet;
+}
+
+function wideInspectionRow(items, log, unit, year) {
+  const itemValues = (items || []).flatMap(item => [item.countedQty ?? 0, item.expiryDate || ""]);
+  return [...itemValues, log.inspectionDate, log.shift, year, log.inspector, unit, log.id, log.checkedAt || ""];
 }
 // Store snapshots in cells, avoiding the size limit of one document property.
 // Current stock is shared across fiscal years; inspection history is archived above.
@@ -77,6 +104,11 @@ function saveState(payload) {
   const rows = Math.max(chunks.length, sheet.getLastRow() - 1);
   if (sheet.getMaxRows() < rows + 1) sheet.insertRowsAfter(sheet.getMaxRows(), rows + 1 - sheet.getMaxRows());
   sheet.getRange(2, 1, rows, 1).setValues(Array.from({ length: rows }, (_, i) => [chunks[i] || ""]));
+}
+function clearState() {
+  const sheet = spreadsheet().getSheetByName("App State");
+  if (sheet && sheet.getLastRow() > 1) sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).clearContent();
+  PropertiesService.getDocumentProperties()?.deleteProperty(STATE_PROPERTY_KEY);
 }
 function loadState() {
   const lock = LockService.getScriptLock();

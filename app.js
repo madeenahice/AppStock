@@ -99,6 +99,9 @@ const els = {
   noExpiry: document.querySelector("#noExpiry"),
   expiryWrap: document.querySelector("#expiryWrap"),
   expiryDate: document.querySelector("#expiryDate"),
+  equipmentFields: document.querySelector("#equipmentFields"),
+  equipmentStatus: document.querySelector("#equipmentStatus"),
+  temperature: document.querySelector("#temperature"),
   deleteItemButton: document.querySelector("#deleteItemButton"),
   settingsButton: document.querySelector("#settingsButton"),
   sidebarToggle: document.querySelector("#sidebarToggle"),
@@ -165,6 +168,8 @@ function hydrateSeed(seed) {
       requiredQty: item.requiredQty == null ? null : Number(item.requiredQty),
       countedQty: Number(item.countedQty) || 0,
       shortageReason: item.shortageReason || "",
+      equipmentStatus: item.equipmentStatus || "พร้อมใช้",
+      temperature: item.temperature == null ? null : Number(item.temperature),
       expiryDate: item.expiryDate || null,
       inspector: item.inspector || "",
       checkedAt: item.checkedAt || "",
@@ -219,6 +224,17 @@ function applySourceCatalog(previous) {
   return result;
 }
 
+function ensureSourceItems(target) {
+  UNITS.forEach(unit => {
+    if (!Array.isArray(target[unit])) target[unit] = [];
+    defaultData[unit].forEach((seed, index) => {
+      const exists = target[unit].some(item => item.sourceId === seed.sourceId || normalizeName(item.name) === normalizeName(seed.name));
+      if (!exists) target[unit].splice(index, 0, cloneData(seed));
+    });
+  });
+  return target;
+}
+
 function loadSettings() {
   const defaults = { token: "", chatId: "", expiryWindow: 30, googleSheetUrl: DEFAULT_GOOGLE_SHEET_URL };
   const stored = localStorage.getItem(SETTINGS_KEY);
@@ -268,6 +284,7 @@ function bindEvents() {
   els.homeButton.addEventListener("click", goHome);
   els.mobileUnitSelect.addEventListener("change", changeMobileUnit);
   els.noExpiry.addEventListener("change", syncExpiryField);
+  els.equipmentStatus.addEventListener("change", syncEquipmentFields);
   document.querySelectorAll("[data-close-dialog]").forEach((button) => {
     button.addEventListener("click", closeParentDialog);
   });
@@ -455,7 +472,28 @@ function renderShortageOverview() {
   }).join("");
 }
 
+function isEquipmentTemperatureItem(item) {
+  return String(item.name || "").trim() === "อุณหภูมิตู้เย็น";
+}
+
+function formatTemperature(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "";
+  return number.toFixed(2);
+}
+
+function getTemperatureValue(item) {
+  if (item == null || item.temperature == null || item.temperature === "") return null;
+  const value = Number(item.temperature);
+  return Number.isFinite(value) ? value : null;
+}
+
 function getItemStatus(item, unit = item.unit || activeUnit) {
+  if (isEquipmentTemperatureItem(item)) {
+    if (item.equipmentStatus === "ส่งซ่อม") return { key: "short", label: "ส่งซ่อม" };
+    return { key: "ok", label: "พร้อมใช้" };
+  }
+
   if (item.requiredQty == null) return { key: "unknown", label: "ยังไม่ระบุจำนวนที่ต้องมี" };
   if (Number(item.countedQty) < Number(item.requiredQty)) return { key: "short", label: "ต้องเติม" };
   if (!item.expiryDate) return { key: "ok", label: "พร้อมใช้" };
@@ -639,6 +677,10 @@ function getAlerts() {
 
 function alertText(item) {
   const status = getItemStatus(item);
+  if (isEquipmentTemperatureItem(item)) {
+    if (status.key === "short") return "ส่งซ่อม";
+    return `พร้อมใช้ · อุณหภูมิ ${formatTemperature(getTemperatureValue(item)) || "0.00"} °C`;
+  }
   if (status.key === "unknown") return "ยังไม่ระบุจำนวนที่ต้องมีในชีทต้นฉบับ";
   if (status.key === "short") return `มี ${item.countedQty}/${item.requiredQty}${shortageReason(item) ? " · " + shortageReason(item) : ""}`;
   if (status.key === "expired") return `หมดอายุ ${formatDate(item.expiryDate)}`;
@@ -680,7 +722,7 @@ function renderStockList() {
           <th>รายการ</th>
           <th>จำนวนที่ต้องมี</th>
           <th>จำนวนที่นับได้</th>
-          <th>วันหมดอายุ</th>
+          <th>วันหมดอายุ / อุณหภูมิ</th>
           <th>สถานะ</th>
           <th>ตรวจล่าสุด</th>
           <th class="action-col">จัดการ</th>
@@ -708,7 +750,18 @@ function renderStockList() {
           <button class="qty-button increase" type="button">+</button>
         </div>
       </td>
-      <td>${item.expiryDate ? escapeHtml(formatDate(item.expiryDate)) : '<span class="muted-cell">ไม่มีวันหมดอายุ</span>'}</td>
+      <td>${isEquipmentTemperatureItem(item)
+        ? `<div class="temperature-check">
+            <select class="temperature-status" aria-label="สถานะ ${escapeHtml(item.name)}">
+              <option${item.equipmentStatus === "พร้อมใช้" ? " selected" : ""}>พร้อมใช้</option>
+              <option${item.equipmentStatus === "ส่งซ่อม" ? " selected" : ""}>ส่งซ่อม</option>
+            </select>
+            <label class="temperature-input-wrap">
+              <span>อุณหภูมิ °C</span>
+              <input class="temperature-input" type="number" min="0" max="5" step="0.01" value="${escapeHtml(formatTemperature(getTemperatureValue(item)) || "")}" ${item.equipmentStatus === "ส่งซ่อม" ? "disabled" : ""} />
+            </label>
+          </div>`
+        : (item.expiryDate ? escapeHtml(formatDate(item.expiryDate)) : '<span class="muted-cell">ไม่มีวันหมดอายุ</span>')}</td>
       <td><span class="${statusBadgeClass(status.key)}">${escapeHtml(status.label)}</span></td>
       <td>${item.checkedAt ? escapeHtml(formatDateTime(item.checkedAt)) : '<span class="muted-cell">ยังไม่ตรวจ</span>'}</td>
       <td class="action-col"><button class="text-button edit-button" type="button">แก้ไข</button></td>
@@ -725,6 +778,8 @@ function renderStockList() {
       saveData();
       render();
     });
+    row.querySelector(".temperature-status")?.addEventListener("change", event => updateTemperatureStatus(item.id, event.target.value));
+    row.querySelector(".temperature-input")?.addEventListener("change", event => updateTemperature(item.id, event.target.value));
 
     body.append(row);
   });
@@ -773,6 +828,42 @@ function updateQty(id, nextQty) {
   render();
 }
 
+function updateTemperatureStatus(id, nextStatus) {
+  const item = data[activeUnit].find((entry) => entry.id === id);
+  if (!item || !isEquipmentTemperatureItem(item)) return;
+  item.equipmentStatus = nextStatus === "ส่งซ่อม" ? "ส่งซ่อม" : "พร้อมใช้";
+  if (item.equipmentStatus === "ส่งซ่อม") item.temperature = null;
+  saveData();
+  render();
+}
+
+function updateTemperature(id, nextValue) {
+  const item = data[activeUnit].find((entry) => entry.id === id);
+  if (!item || !isEquipmentTemperatureItem(item)) return;
+  const value = Number(nextValue);
+  if (!Number.isFinite(value) || value < 0 || value > 5) {
+    alert("กรุณาใส่อุณหภูมิตู้เย็นระหว่าง 0.00-5.00 °C");
+    render();
+    return;
+  }
+  item.equipmentStatus = "พร้อมใช้";
+  item.temperature = value;
+  saveData();
+  render();
+}
+
+function validateTemperatureChecks(unit) {
+  if (unit !== "Equipment") return true;
+  const invalid = data[unit].find(item => {
+    if (!isEquipmentTemperatureItem(item) || item.equipmentStatus === "ส่งซ่อม") return false;
+    const value = getTemperatureValue(item);
+    return value == null || value < 0 || value > 5;
+  });
+  if (!invalid) return true;
+  alert("กรุณาเช็คอุณหภูมิตู้เย็นให้อยู่ระหว่าง 0.00-5.00 °C หรือเลือกสถานะส่งซ่อมก่อนบันทึก");
+  return false;
+}
+
 async function saveInspection() {
   const inspector = els.inspectionInspector.value.trim();
   const inspectionDate = els.inspectionDate.value;
@@ -782,6 +873,7 @@ async function saveInspection() {
     return;
   }
   const unit = activeUnit;
+  if (!validateTemperatureChecks(unit)) return;
   const checkedAt = new Date().toISOString();
   data[unit].forEach(item => Object.assign(item, { inspector, checkedAt, inspectionDate, shift }));
   const checkLog = addCheckLog(unit, inspector, checkedAt, inspectionDate, shift);
@@ -803,6 +895,7 @@ async function saveInspection() {
 
 function openItemDialog(item = null) {
   const editing = Boolean(item);
+  const isTemperatureItem = item ? isEquipmentTemperatureItem(item) : false;
   els.dialogTitle.textContent = editing ? "แก้ไขรายการ" : "เพิ่มรายการ";
   els.editingId.value = item?.id || "";
   els.itemName.value = item?.name || "";
@@ -810,8 +903,12 @@ function openItemDialog(item = null) {
   els.countedQty.value = item?.countedQty ?? 0;
   els.noExpiry.checked = !item?.expiryDate;
   els.expiryDate.value = item?.expiryDate || "";
+  els.equipmentFields.hidden = !isTemperatureItem;
+  els.equipmentStatus.value = item?.equipmentStatus || "พร้อมใช้";
+  els.temperature.value = item?.temperature ?? "";
   els.deleteItemButton.hidden = !editing;
   syncExpiryField();
+  syncEquipmentFields();
   els.itemDialog.showModal();
 }
 
@@ -821,16 +918,33 @@ function syncExpiryField() {
   if (els.noExpiry.checked) els.expiryDate.value = "";
 }
 
+function syncEquipmentFields() {
+  const needsTemperature = !els.equipmentFields.hidden && els.equipmentStatus.value === "พร้อมใช้";
+  els.temperature.disabled = !needsTemperature;
+  els.temperature.required = needsTemperature;
+  if (!needsTemperature) els.temperature.value = "";
+}
+
 function saveItem(event) {
   event.preventDefault();
   const id = els.editingId.value || createId();
   const existingItem = data[activeUnit].find((item) => item.id === id);
+  const name = els.itemName.value.trim();
+  const isTemperatureItem = activeUnit === "Equipment" && normalizeName(name) === normalizeName("อุณหภูมิตู้เย็น");
+  const temperatureValue = isTemperatureItem ? Number(els.temperature.value) : null;
+  const equipmentStatus = isTemperatureItem ? (els.equipmentStatus.value || "พร้อมใช้") : "";
+  if (isTemperatureItem && equipmentStatus === "พร้อมใช้" && (!Number.isFinite(temperatureValue) || temperatureValue < 0 || temperatureValue > 5)) {
+    alert("กรุณาใส่อุณหภูมิตู้เย็นระหว่าง 0.00-5.00 °C");
+    return;
+  }
   const nextItem = {
     id,
-    name: els.itemName.value.trim(),
+    name,
     requiredQty: Number(els.requiredQty.value) || 0,
     countedQty: Number(els.countedQty.value) || 0,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
+    equipmentStatus,
+    temperature: isTemperatureItem && equipmentStatus === "พร้อมใช้" ? temperatureValue : null,
     inspector: existingItem?.inspector || "",
     checkedAt: existingItem?.checkedAt || "",
     inspectionDate: existingItem?.inspectionDate || "",
@@ -1094,6 +1208,7 @@ async function loadCloudState() {
       backupBeforeSourceImport(nextData, "cloud");
       nextData = applySourceCatalog(nextData);
     }
+    nextData = ensureSourceItems(nextData);
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
     cloudSyncPaused = true;
     data = nextData;
@@ -1152,7 +1267,7 @@ function normalizeImportedData(importedData) {
       return true;
     });
   });
-  return normalized;
+  return ensureSourceItems(normalized);
 }
 
 async function sendTelegramMessage(message) {
