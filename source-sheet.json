@@ -31,7 +31,7 @@
       1,
       "CPM 10 mg",
       5,
-      "0.9% NSS 1000 ml",
+      "0.9% NSS 1000 ml.",
       3,
       "EKG 12 lead",
       1
@@ -45,12 +45,12 @@
       1,
       "blade (Ped) no.00 ตรง",
       1,
-      "Dexa 4 mg",
+      "Dexamethasone 4 mg",
       5,
-      "5% DN/2 1000 ml.",
+      "5% DNSS 1000 ml.",
       2,
-      "Infusion pump",
-      11
+      "Ventilator C-1",
+      2
     ],
     [
       "10% Calcium gluconate 10 ml",
@@ -63,10 +63,10 @@
       1,
       "Diazepam 10 mg",
       1,
-      "5% DNSS 1000 ml",
+      "Ringer 1000 ml.",
       2,
-      "Body guard",
-      10
+      "Ventilator T-1",
+      2
     ],
     [
       "Cordarone 150 mg/3ml Inj",
@@ -79,10 +79,10 @@
       1,
       "NTG 25 mg/5 ml",
       4,
-      "Ringer 1000 ml.",
-      1,
-      "Ventilator C-1",
-      2
+      "Acetar1000 ml.",
+      2,
+      "Defibrillator X-series",
+      3
     ],
     [
       "50% Glucose 50 ml",
@@ -93,11 +93,11 @@
       1,
       "blade (Ped) no.00, 0, 1ตรง,",
       1,
-      "Nicardipine 25mg/25ml",
+      "Nicardipine  25 mg/25ml",
       1,
-      "Acetar1000 ml",
+      "0.9% NSS 500 ml.",
       2,
-      "Ventilator T-1",
+      "Syring pump",
       2
     ],
     [
@@ -111,9 +111,9 @@
       1,
       "Norepineprhine 4 mg/4ml",
       1,
-      "0.9% NSS 500 ml",
-      3,
-      "Defibrillator X-series",
+      "0.9% NSS 100 ml.",
+      5,
+      "HFNC Comen",
       3
     ],
     [
@@ -125,12 +125,12 @@
       1,
       "blade (Ped) 2 โค้ง",
       1,
-      "Furosmide 20 mg",
+      "Furosemide 20 mg",
       2,
-      "5% DNSS 500 ml",
+      "5%DW 100 ml",
       2,
-      "Syring pump",
-      2
+      "Ultrasound",
+      1
     ],
     [
       "50%Magnesium sulfate 2 ml",
@@ -143,10 +143,10 @@
       1,
       "50% Glucose 50 ml",
       1,
-      "5% DN/2 500 ml",
-      2,
-      "HFNC Comen",
-      3
+      "10%DN/2 1000 ml",
+      1,
+      null,
+      null
     ],
     [
       "Adenocor 6 mg 2 ml",
@@ -159,10 +159,10 @@
       1,
       "Beradual Forte  NB",
       5,
-      "5% DN/3 500 ml",
-      1,
-      "Ultrasound",
-      1
+      "5%DW 250 ml",
+      2,
+      null,
+      null
     ],
     [
       "Hydrocortisone 100 mg 2 ml",
@@ -175,10 +175,10 @@
       1,
       "Ventolin 2.5 mg NB",
       5,
-      "0.9% NSS 100 ml.",
-      5,
-      "EKG 12 lead",
-      1
+      "sterile water 1000 ml",
+      3,
+      null,
+      null
     ],
     [
       "7.5% Sodium Bicarbonate Inj 50 ml",
@@ -191,10 +191,10 @@
       1,
       "Pulmicort 1mg/2ml NB",
       5,
-      "5% DW 100 ml.",
+      "Top balance 1000 ml",
       2,
-      "Infusion pump",
-      11
+      null,
+      null
     ],
     [
       "Lasix 20 mg/2ml",
@@ -207,10 +207,10 @@
       1,
       "Hydrocortisone 100 mg",
       2,
-      "10% DN/2 1000 ml.",
-      2,
-      "Body guard",
-      10
+      null,
+      null,
+      null,
+      null
     ],
     [
       "Chlorpheniramine10mg/1ml",
@@ -223,10 +223,10 @@
       1,
       "Ondransetron 4 mg/2ml",
       2,
-      "5% DW 250 ml.",
-      4,
-      "Ventilator C-1",
-      2
+      null,
+      null,
+      null,
+      null
     ],
     [
       "Dexamethazone 4 mg",
@@ -239,10 +239,10 @@
       1,
       "Dimenhydrinate 50 mg",
       1,
-      "0.9% NSS 1000 ml",
-      3,
-      "Ventilator T-1",
-      2
+      null,
+      null,
+      null,
+      null
     ],
     [
       "Beradual forte 4 ml",
@@ -253,12 +253,12 @@
       2,
       "Sterlile syring ball no.1",
       1,
-      "Paracetamol 500 mg",
-      20,
-      "5% DN/2 1000 ml.",
-      2,
-      "Defibrillator X-series",
-      3
+      "Para Syr (120mg/ml)",
+      3,
+      null,
+      null,
+      null,
+      null
     ],
     [
       "Ventolin 2.5 ml",
@@ -269,12 +269,12 @@
       2,
       "ปรอทวัดทางทวาร",
       2,
-      "Chloram ",
-      1,
-      "5% DNSS 1000 ml",
-      2,
-      "Syring pump",
-      2
+      "Paracetamol 500 mg",
+      30,
+      null,
+      null,
+      null,
+      null
     ],
     [
       "2% Lidocain without Adrenaline (20mg/ml )",
@@ -285,12 +285,12 @@
       2,
       "Cord clamp",
       5,
-      "Para Syr (120mg/ml)",
+      "Chloram ointment",
       1,
-      "Ringer 1000 ml.",
-      1,
-      "HFNC Comen",
-      3
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -303,10 +303,10 @@
       1,
       null,
       null,
-      "Acetar1000 ml",
-      2,
-      "Ultrasound",
-      1
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -319,8 +319,10 @@
       1,
       null,
       null,
-      "0.9% NSS 500 ml",
-      3
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -333,8 +335,10 @@
       1,
       null,
       null,
-      "5% DNSS 500 ml",
-      2
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -347,8 +351,10 @@
       2,
       null,
       null,
-      "5% DN/2 500 ml",
-      2
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -361,8 +367,10 @@
       2,
       null,
       null,
-      "5% DN/3 500 ml",
-      1
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -375,8 +383,10 @@
       1,
       null,
       null,
-      "0.9% NSS 100 ml.",
-      5
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -389,8 +399,10 @@
       4,
       null,
       null,
-      "5% DW 100 ml.",
-      2
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -403,8 +415,10 @@
       1,
       null,
       null,
-      "10% DN/2 1000 ml.",
-      2
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -417,8 +431,10 @@
       1,
       null,
       null,
-      "5% DW 250 ml.",
-      4
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -428,7 +444,13 @@
       "Needle No.18",
       10,
       "ET-tube No.2.5 uncuffed",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -438,7 +460,13 @@
       "Needle No.20",
       10,
       "ET-tube No.3.0 uncuffed",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -448,7 +476,13 @@
       "Needle No.22",
       10,
       "ET-tube No.3.0 with cuff",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -458,7 +492,13 @@
       "Syringe size 3 ml",
       5,
       "ET-tube No.3.5 with cuff",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -468,7 +508,13 @@
       "Syringe size 5 ml",
       5,
       "ET-tube 4.0 with cuff",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -478,7 +524,13 @@
       "Syringe size 10 ml",
       5,
       "ET-tube 4.5 with cuff",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -488,7 +540,13 @@
       "Syringe size 20 ml",
       3,
       "ET-tube 5.0 with cuff",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -498,7 +556,13 @@
       "Syringe size 50 ml",
       3,
       "ET-tube 5.5 with cuff",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -508,7 +572,13 @@
       "IV set",
       3,
       "Sterile Stylet no.6",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -518,7 +588,13 @@
       "Extension with T",
       3,
       "Sterile Stylet no.10",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -528,7 +604,13 @@
       "Extension No.18\"",
       3,
       "Suction no.6",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -538,7 +620,13 @@
       "Tegaderm 6*7",
       3,
       "Suction no.8",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -548,7 +636,13 @@
       "3-way",
       3,
       "Suction no.10",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -558,7 +652,13 @@
       "O2 mask with bag (Adult)",
       2,
       "Strap tube/ Sterile gel /syring 3 ml",
-      3
+      3,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -568,7 +668,13 @@
       "Ambu-bag (Adult)",
       1,
       "Face mask no.0",
-      7
+      7,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -578,7 +684,13 @@
       "Sterile gloves No. 6.5",
       2,
       "Face mask no.1",
-      8
+      8,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -588,7 +700,13 @@
       "Sterile gloves No.7",
       2,
       "Face mask no.2",
-      5
+      5,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -598,7 +716,13 @@
       "Sterile gloves No. 7.5",
       2,
       "O2 mask with bag (Ped)",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -608,7 +732,13 @@
       "CPE Gown",
       2,
       "Ambu-bag (Neonatal)",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -618,7 +748,13 @@
       "Glasses",
       1,
       "Ambu-bag (Ped)",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -626,9 +762,15 @@
       null,
       null,
       "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)",
-      1,
+      0,
       "Sterile gloves No. 6",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -638,7 +780,13 @@
       "CPR Board",
       1,
       "Sterile gloves No. 6.5",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -648,7 +796,13 @@
       null,
       null,
       "Sterile gloves No. 7",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -658,7 +812,13 @@
       null,
       null,
       "Sterile gloves No. 7.5",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -668,7 +828,13 @@
       null,
       null,
       "CPE Gown",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -678,7 +844,13 @@
       null,
       null,
       "Glasses",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -688,7 +860,13 @@
       null,
       null,
       "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -698,7 +876,13 @@
       null,
       null,
       "CPR Board",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -708,7 +892,13 @@
       null,
       null,
       "Oxygen tube (ชั้น 1 Radiant warmmer)",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -718,7 +908,13 @@
       null,
       null,
       "3-piece (ชั้น 1 Radiant warmmer)",
-      1
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -728,7 +924,13 @@
       null,
       null,
       "Tegaderm 4*4 (ชั้น 1 Radiant warmmer)",
-      5
+      5,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -738,7 +940,13 @@
       null,
       null,
       "Plastic wrap (ชั้น 2 Radiant warmmer)",
-      2
+      2,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -748,7 +956,13 @@
       null,
       null,
       "Thermo trace central (ชั้น 2 Radiant warmmer)",
-      3
+      3,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ],
     [
       null,
@@ -757,7 +971,14 @@
       null,
       null,
       null,
-      "Thermo trace peripheral (ชั้น 2 Radiant warmmer)"
+      "Thermo trace peripheral (ชั้น 2 Radiant warmmer)",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ]
   ]
 }

@@ -13,7 +13,7 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-8-3",
-      "name": "Dexa 4 mg",
+      "name": "Dexamethasone 4 mg",
       "requiredQty": 5,
       "countedQty": 5,
       "expiryDate": null,
@@ -40,7 +40,7 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-8-6",
-      "name": "Nicardipine 25mg/25ml",
+      "name": "Nicardipine  25 mg/25ml",
       "requiredQty": 1,
       "countedQty": 1,
       "expiryDate": null,
@@ -58,7 +58,7 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-8-8",
-      "name": "Furosmide 20 mg",
+      "name": "Furosemide 20 mg",
       "requiredQty": 2,
       "countedQty": 2,
       "expiryDate": null,
@@ -130,25 +130,25 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-8-16",
-      "name": "Paracetamol 500 mg",
-      "requiredQty": 20,
-      "countedQty": 20,
+      "name": "Para Syr (120mg/ml)",
+      "requiredQty": 3,
+      "countedQty": 3,
       "expiryDate": null,
       "inspector": "",
       "checkedAt": ""
     },
     {
       "sourceId": "rn-source-8-17",
-      "name": "Chloram",
-      "requiredQty": 1,
-      "countedQty": 1,
+      "name": "Paracetamol 500 mg",
+      "requiredQty": 30,
+      "countedQty": 30,
       "expiryDate": null,
       "inspector": "",
       "checkedAt": ""
     },
     {
       "sourceId": "rn-source-8-18",
-      "name": "Para Syr (120mg/ml)",
+      "name": "Chloram ointment",
       "requiredQty": 1,
       "countedQty": 1,
       "expiryDate": null,
@@ -159,7 +159,7 @@ window.SEED_STOCK_DATA = {
   "IV Fluid": [
     {
       "sourceId": "rn-source-10-2",
-      "name": "0.9% NSS 1000 ml",
+      "name": "0.9% NSS 1000 ml.",
       "requiredQty": 3,
       "countedQty": 3,
       "expiryDate": null,
@@ -168,7 +168,7 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-10-3",
-      "name": "5% DN/2 1000 ml.",
+      "name": "5% DNSS 1000 ml.",
       "requiredQty": 2,
       "countedQty": 2,
       "expiryDate": null,
@@ -177,7 +177,7 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-10-4",
-      "name": "5% DNSS 1000 ml",
+      "name": "Ringer 1000 ml.",
       "requiredQty": 2,
       "countedQty": 2,
       "expiryDate": null,
@@ -186,16 +186,16 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-10-5",
-      "name": "Ringer 1000 ml.",
-      "requiredQty": 1,
-      "countedQty": 1,
+      "name": "Acetar1000 ml.",
+      "requiredQty": 2,
+      "countedQty": 2,
       "expiryDate": null,
       "inspector": "",
       "checkedAt": ""
     },
     {
       "sourceId": "rn-source-10-6",
-      "name": "Acetar1000 ml",
+      "name": "0.9% NSS 500 ml.",
       "requiredQty": 2,
       "countedQty": 2,
       "expiryDate": null,
@@ -204,42 +204,6 @@ window.SEED_STOCK_DATA = {
     },
     {
       "sourceId": "rn-source-10-7",
-      "name": "0.9% NSS 500 ml",
-      "requiredQty": 3,
-      "countedQty": 3,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-10-8",
-      "name": "5% DNSS 500 ml",
-      "requiredQty": 2,
-      "countedQty": 2,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-10-9",
-      "name": "5% DN/2 500 ml",
-      "requiredQty": 2,
-      "countedQty": 2,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-10-10",
-      "name": "5% DN/3 500 ml",
-      "requiredQty": 1,
-      "countedQty": 1,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-10-11",
       "name": "0.9% NSS 100 ml.",
       "requiredQty": 5,
       "countedQty": 5,
@@ -248,28 +212,46 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
+      "sourceId": "rn-source-10-8",
+      "name": "5%DW 100 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-9",
+      "name": "10%DN/2 1000 ml",
+      "requiredQty": 1,
+      "countedQty": 1,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-10",
+      "name": "5%DW 250 ml",
+      "requiredQty": 2,
+      "countedQty": 2,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "rn-source-10-11",
+      "name": "sterile water 1000 ml",
+      "requiredQty": 3,
+      "countedQty": 3,
+      "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
       "sourceId": "rn-source-10-12",
-      "name": "5% DW 100 ml.",
+      "name": "Top balance 1000 ml",
       "requiredQty": 2,
       "countedQty": 2,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-10-13",
-      "name": "10% DN/2 1000 ml.",
-      "requiredQty": 2,
-      "countedQty": 2,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-10-14",
-      "name": "5% DW 250 ml.",
-      "requiredQty": 4,
-      "countedQty": 4,
       "expiryDate": null,
       "inspector": "",
       "checkedAt": ""
@@ -286,36 +268,7 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
-      "sourceId": "equipment-fridge-temperature",
-      "name": "อุณหภูมิตู้เย็น",
-      "requiredQty": 1,
-      "countedQty": 1,
-      "expiryDate": null,
-      "equipmentStatus": "พร้อมใช้",
-      "temperature": 4,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
       "sourceId": "rn-source-12-3",
-      "name": "Infusion pump",
-      "requiredQty": 11,
-      "countedQty": 11,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-12-4",
-      "name": "Body guard",
-      "requiredQty": 10,
-      "countedQty": 10,
-      "expiryDate": null,
-      "inspector": "",
-      "checkedAt": ""
-    },
-    {
-      "sourceId": "rn-source-12-5",
       "name": "Ventilator C-1",
       "requiredQty": 2,
       "countedQty": 2,
@@ -324,7 +277,7 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
-      "sourceId": "rn-source-12-6",
+      "sourceId": "rn-source-12-4",
       "name": "Ventilator T-1",
       "requiredQty": 2,
       "countedQty": 2,
@@ -333,7 +286,7 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
-      "sourceId": "rn-source-12-7",
+      "sourceId": "rn-source-12-5",
       "name": "Defibrillator X-series",
       "requiredQty": 3,
       "countedQty": 3,
@@ -342,7 +295,7 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
-      "sourceId": "rn-source-12-8",
+      "sourceId": "rn-source-12-6",
       "name": "Syring pump",
       "requiredQty": 2,
       "countedQty": 2,
@@ -351,7 +304,7 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
-      "sourceId": "rn-source-12-9",
+      "sourceId": "rn-source-12-7",
       "name": "HFNC Comen",
       "requiredQty": 3,
       "countedQty": 3,
@@ -360,11 +313,22 @@ window.SEED_STOCK_DATA = {
       "checkedAt": ""
     },
     {
-      "sourceId": "rn-source-12-10",
+      "sourceId": "rn-source-12-8",
       "name": "Ultrasound",
       "requiredQty": 1,
       "countedQty": 1,
       "expiryDate": null,
+      "inspector": "",
+      "checkedAt": ""
+    },
+    {
+      "sourceId": "equipment-fridge-temperature",
+      "name": "อุณหภูมิตู้เย็น",
+      "requiredQty": null,
+      "countedQty": 0,
+      "expiryDate": null,
+      "equipmentStatus": "พร้อมใช้",
+      "temperature": 4,
       "inspector": "",
       "checkedAt": ""
     }
@@ -1106,8 +1070,8 @@ window.SEED_STOCK_DATA = {
     {
       "sourceId": "rn-source-4-48",
       "name": "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)",
-      "requiredQty": 1,
-      "countedQty": 1,
+      "requiredQty": 0,
+      "countedQty": 0,
       "expiryDate": null,
       "inspector": "",
       "checkedAt": ""
@@ -1657,8 +1621,8 @@ window.SEED_STOCK_DATA = {
     {
       "sourceId": "rn-source-6-61",
       "name": "Thermo trace peripheral (ชั้น 2 Radiant warmmer)",
-      "requiredQty": 3,
-      "countedQty": 3,
+      "requiredQty": null,
+      "countedQty": 0,
       "expiryDate": null,
       "inspector": "",
       "checkedAt": ""

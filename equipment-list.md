@@ -5,12 +5,12 @@
 ## Med Stock (17 รายการ)
 
 - CPM 10 mg — จำนวนที่ต้องมี 5
-- Dexa 4 mg — จำนวนที่ต้องมี 5
+- Dexamethasone 4 mg — จำนวนที่ต้องมี 5
 - Diazepam 10 mg — จำนวนที่ต้องมี 1
 - NTG 25 mg/5 ml — จำนวนที่ต้องมี 4
-- Nicardipine 25mg/25ml — จำนวนที่ต้องมี 1
+- Nicardipine  25 mg/25ml — จำนวนที่ต้องมี 1
 - Norepineprhine 4 mg/4ml — จำนวนที่ต้องมี 1
-- Furosmide 20 mg — จำนวนที่ต้องมี 2
+- Furosemide 20 mg — จำนวนที่ต้องมี 2
 - 50% Glucose 50 ml — จำนวนที่ต้องมี 1
 - Beradual Forte  NB — จำนวนที่ต้องมี 5
 - Ventolin 2.5 mg NB — จำนวนที่ต้องมี 5
@@ -18,37 +18,34 @@
 - Hydrocortisone 100 mg — จำนวนที่ต้องมี 2
 - Ondransetron 4 mg/2ml — จำนวนที่ต้องมี 2
 - Dimenhydrinate 50 mg — จำนวนที่ต้องมี 1
-- Paracetamol 500 mg — จำนวนที่ต้องมี 20
-- Chloram — จำนวนที่ต้องมี 1
-- Para Syr (120mg/ml) — จำนวนที่ต้องมี 1
+- Para Syr (120mg/ml) — จำนวนที่ต้องมี 3
+- Paracetamol 500 mg — จำนวนที่ต้องมี 30
+- Chloram ointment — จำนวนที่ต้องมี 1
 
-## IV Fluid (13 รายการ)
+## IV Fluid (11 รายการ)
 
-- 0.9% NSS 1000 ml — จำนวนที่ต้องมี 3
-- 5% DN/2 1000 ml. — จำนวนที่ต้องมี 2
-- 5% DNSS 1000 ml — จำนวนที่ต้องมี 2
-- Ringer 1000 ml. — จำนวนที่ต้องมี 1
-- Acetar1000 ml — จำนวนที่ต้องมี 2
-- 0.9% NSS 500 ml — จำนวนที่ต้องมี 3
-- 5% DNSS 500 ml — จำนวนที่ต้องมี 2
-- 5% DN/2 500 ml — จำนวนที่ต้องมี 2
-- 5% DN/3 500 ml — จำนวนที่ต้องมี 1
+- 0.9% NSS 1000 ml. — จำนวนที่ต้องมี 3
+- 5% DNSS 1000 ml. — จำนวนที่ต้องมี 2
+- Ringer 1000 ml. — จำนวนที่ต้องมี 2
+- Acetar1000 ml. — จำนวนที่ต้องมี 2
+- 0.9% NSS 500 ml. — จำนวนที่ต้องมี 2
 - 0.9% NSS 100 ml. — จำนวนที่ต้องมี 5
-- 5% DW 100 ml. — จำนวนที่ต้องมี 2
-- 10% DN/2 1000 ml. — จำนวนที่ต้องมี 2
-- 5% DW 250 ml. — จำนวนที่ต้องมี 4
+- 5%DW 100 ml — จำนวนที่ต้องมี 2
+- 10%DN/2 1000 ml — จำนวนที่ต้องมี 1
+- 5%DW 250 ml — จำนวนที่ต้องมี 2
+- sterile water 1000 ml — จำนวนที่ต้องมี 3
+- Top balance 1000 ml — จำนวนที่ต้องมี 2
 
-## Equipment (9 รายการ)
+## Equipment (8 รายการ)
 
 - EKG 12 lead — จำนวนที่ต้องมี 1
-- Infusion pump — จำนวนที่ต้องมี 11
-- Body guard — จำนวนที่ต้องมี 10
 - Ventilator C-1 — จำนวนที่ต้องมี 2
 - Ventilator T-1 — จำนวนที่ต้องมี 2
 - Defibrillator X-series — จำนวนที่ต้องมี 3
 - Syring pump — จำนวนที่ต้องมี 2
 - HFNC Comen — จำนวนที่ต้องมี 3
 - Ultrasound — จำนวนที่ต้องมี 1
+- อุณหภูมิตู้เย็น — จำนวนที่ต้องมี ยังไม่ระบุในชีท
 
 ## CPR Box (18 รายการ)
 
@@ -139,7 +136,7 @@
 - Sterile gloves No. 7.5 — จำนวนที่ต้องมี 2
 - CPE Gown — จำนวนที่ต้องมี 2
 - Glasses — จำนวนที่ต้องมี 1
-- ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line) — จำนวนที่ต้องมี 1
+- ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line) — จำนวนที่ต้องมี 0
 - CPR Board — จำนวนที่ต้องมี 1
 
 ## Emer cart PED (60 รายการ)
@@ -203,4 +200,4 @@
 - Tegaderm 4*4 (ชั้น 1 Radiant warmmer) — จำนวนที่ต้องมี 5
 - Plastic wrap (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี 2
 - Thermo trace central (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี 3
-- Thermo trace peripheral (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี 3
+- Thermo trace peripheral (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี ยังไม่ระบุในชีท
