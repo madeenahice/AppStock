@@ -1,6 +1,6 @@
-# รายการจากชีทต้นฉบับ
+# รายการในระบบ
 
-แหล่งข้อมูล: ต้นฉบับข้อมูล ('ต้นฉบับข้อมูล'!A1:N200)
+แหล่งข้อมูล: catalog-data.json (manual-catalog-20260928-1)
 
 ## Med Stock (17 รายการ)
 
@@ -45,7 +45,7 @@
 - Syring pump — จำนวนที่ต้องมี 2
 - HFNC Comen — จำนวนที่ต้องมี 3
 - Ultrasound — จำนวนที่ต้องมี 1
-- อุณหภูมิตู้เย็น — จำนวนที่ต้องมี ยังไม่ระบุในชีท
+- อุณหภูมิตู้เย็น — จำนวนที่ต้องมี 0.00-5.00 °C
 
 ## CPR Box (18 รายการ)
 
@@ -200,4 +200,4 @@
 - Tegaderm 4*4 (ชั้น 1 Radiant warmmer) — จำนวนที่ต้องมี 5
 - Plastic wrap (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี 2
 - Thermo trace central (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี 3
-- Thermo trace peripheral (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี ยังไม่ระบุในชีท
+- Thermo trace peripheral (ชั้น 2 Radiant warmmer) — จำนวนที่ต้องมี 3
