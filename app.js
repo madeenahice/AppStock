@@ -9,8 +9,8 @@ const SHORTAGE_REASONS = ["รอเบิก", "ตามไม่ได้"];
 const EQUIPMENT_SHORTAGE_REASONS = ["ถูกยืม", "ส่งซ่อม"];
 const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่าย"];
 const STORAGE_KEY = "cute-med-stock-v3";
-const SOURCE_VERSION_KEY = "med-stock-source-version";
-const SOURCE_VERSION = window.SEED_SOURCE_VERSION || "";
+const CATALOG_VERSION_KEY = "med-stock-catalog-version";
+const CATALOG_VERSION = window.SEED_CATALOG_VERSION || "";
 const SETTINGS_KEY = "cute-med-stock-settings-v1";
 const CHECK_LOG_KEY = "cute-med-stock-check-log-v1";
 const SIDEBAR_KEY = "cute-med-stock-sidebar-collapsed-v1";
@@ -53,6 +53,8 @@ let activeView = "home";
 let searchTerm = "";
 let sortMode = "default";
 let statusFilter = "all";
+let dashboardFilterMode = "month";
+let dashboardFilterMonth = localDate().slice(0, 7);
 let cloudSyncPaused = false;
 let cloudSaveTimer = null;
 
@@ -78,7 +80,11 @@ const els = {
   shortItems: document.querySelector("#shortItems"),
   monthlyReminder: document.querySelector("#monthlyReminder"),
   dashboardInsights: document.querySelector("#dashboardInsights"),
+  dashboardFilterMode: document.querySelector("#dashboardFilterMode"),
+  dashboardFilterMonth: document.querySelector("#dashboardFilterMonth"),
+  dashboardFilterSummary: document.querySelector("#dashboardFilterSummary"),
   dashboardCharts: document.querySelector("#dashboardCharts"),
+  temperatureChart: document.querySelector("#temperatureChart"),
   inspectorHeatmap: document.querySelector("#inspectorHeatmap"),
   searchInput: document.querySelector("#searchInput"),
   sortSelect: document.querySelector("#sortSelect"),
@@ -119,6 +125,8 @@ init();
 
 function init() {
   els.inspectionDate.value = localDate();
+  els.dashboardFilterMode.value = dashboardFilterMode;
+  els.dashboardFilterMonth.value = dashboardFilterMonth;
   renderInspectors();
   syncSidebar();
   renderTabs();
@@ -134,6 +142,44 @@ function localDate() {
 function fiscalYear(date) {
   const [year, month] = date.split("-").map(Number);
   return year + (month >= 10 ? 1 : 0) + 543;
+}
+
+function dashboardFilterRange() {
+  const monthValue = dashboardFilterMonth || localDate().slice(0, 7);
+  const [year, month] = monthValue.split("-").map(Number);
+  if (dashboardFilterMode === "fiscal") {
+    const fiscal = fiscalYear(`${monthValue}-01`);
+    const startYear = fiscal - 544;
+    return {
+      mode: "fiscal",
+      label: `ปีงบประมาณ ${fiscal}`,
+      start: `${startYear}-10-01`,
+      end: `${startYear + 1}-09-30`,
+      fiscalYear: fiscal,
+    };
+  }
+  const endDate = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+  return {
+    mode: "month",
+    label: new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" }).format(new Date(`${monthValue}-01T00:00:00`)),
+    start: `${monthValue}-01`,
+    end: endDate,
+    fiscalYear: fiscalYear(`${monthValue}-01`),
+  };
+}
+
+function logDate(log) {
+  return log.inspectionDate || String(log.checkedAt || "").slice(0, 10);
+}
+
+function logInDashboardPeriod(log, range = dashboardFilterRange()) {
+  const date = logDate(log);
+  return date >= range.start && date <= range.end;
+}
+
+function dashboardLogs() {
+  const range = dashboardFilterRange();
+  return checkLogs.filter((log) => logInDashboardPeriod(log, range));
 }
 
 function inspectorNames() {
@@ -170,6 +216,7 @@ function hydrateSeed(seed) {
       shortageReason: item.shortageReason || "",
       equipmentStatus: item.equipmentStatus || "พร้อมใช้",
       temperature: item.temperature == null ? null : Number(item.temperature),
+      temperatureRange: item.temperatureRange || null,
       expiryDate: item.expiryDate || null,
       inspector: item.inspector || "",
       checkedAt: item.checkedAt || "",
@@ -193,7 +240,8 @@ function daysFromNow(days) {
 
 function loadData() {
   localStorage.removeItem?.(STORAGE_KEY);
-  localStorage.removeItem?.(SOURCE_VERSION_KEY);
+  localStorage.removeItem?.("med-stock-source-version");
+  localStorage.removeItem?.(CATALOG_VERSION_KEY);
   return cloneData(defaultData);
 }
 
@@ -201,21 +249,20 @@ function cloneData(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function backupBeforeSourceImport(previous, origin) {
+function backupBeforeCatalogImport(previous, origin) {
   void previous;
   void origin;
 }
 
-function applySourceCatalog(previous) {
+function applyCatalog(previous) {
   const result = {};
   const used = new Set();
   UNITS.forEach(unit => {
-    // Match operational values to the same named item. The original CPR and
-    // medicine seed lists were reversed relative to the source sheet headings.
+    // Match operational values to the same named item when restoring a catalog.
     const alternate = unit === "CPR Box" ? "Emer medicine" : unit === "Emer medicine" ? "CPR Box" : null;
     const candidates = [...(previous[unit] || []), ...(alternate ? previous[alternate] || [] : [])];
     result[unit] = defaultData[unit].map(seed => {
-      const old = candidates.find(item => !used.has(item) && (item.sourceId === seed.sourceId || normalizeName(item.name) === normalizeName(seed.name)));
+      const old = candidates.find(item => !used.has(item) && normalizeName(item.name) === normalizeName(seed.name));
       if (!old) return cloneData(seed);
       used.add(old);
       return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: seed.requiredQty };
@@ -224,11 +271,11 @@ function applySourceCatalog(previous) {
   return result;
 }
 
-function ensureSourceItems(target) {
+function ensureCatalogItems(target) {
   UNITS.forEach(unit => {
     if (!Array.isArray(target[unit])) target[unit] = [];
     defaultData[unit].forEach((seed, index) => {
-      const exists = target[unit].some(item => item.sourceId === seed.sourceId || normalizeName(item.name) === normalizeName(seed.name));
+      const exists = target[unit].some(item => normalizeName(item.name) === normalizeName(seed.name));
       if (!exists) target[unit].splice(index, 0, cloneData(seed));
     });
   });
@@ -296,6 +343,15 @@ function bindEvents() {
   els.settingsForm.addEventListener("submit", saveSettingsForm);
   els.sendTelegramButton.addEventListener("click", sendTelegramAlert);
   els.clearSavedStateButton.addEventListener("click", clearSavedState);
+  els.dashboardFilterMode.addEventListener("change", () => {
+    dashboardFilterMode = els.dashboardFilterMode.value;
+    renderDashboard();
+  });
+  els.dashboardFilterMonth.addEventListener("change", () => {
+    dashboardFilterMonth = els.dashboardFilterMonth.value || localDate().slice(0, 7);
+    els.dashboardFilterMonth.value = dashboardFilterMonth;
+    renderDashboard();
+  });
 }
 
 function closeParentDialog(event) {
@@ -416,7 +472,7 @@ function render() {
   });
 
   renderPageHeader();
-  els.infoGrid.hidden = activeView === "unit";
+  els.infoGrid.hidden = activeView !== "home";
   els.shortageOverview.hidden = activeView !== "home";
   els.monthlyReminder.hidden = activeView !== "home";
   els.dashboardInsights.hidden = activeView !== "dashboard";
@@ -488,6 +544,12 @@ function getTemperatureValue(item) {
   return Number.isFinite(value) ? value : null;
 }
 
+function getTemperatureRangeText(item) {
+  const range = item?.temperatureRange || (isEquipmentTemperatureItem(item) ? { min: 0, max: 5 } : null);
+  if (!range) return "";
+  return `${formatTemperature(range.min)}-${formatTemperature(range.max)} °C`;
+}
+
 function getItemStatus(item, unit = item.unit || activeUnit) {
   if (isEquipmentTemperatureItem(item)) {
     if (item.equipmentStatus === "ส่งซ่อม") return { key: "short", label: "ส่งซ่อม" };
@@ -541,8 +603,82 @@ function dashboardPieStyle(counts) {
   return `conic-gradient(var(--mint) 0 ${complete}deg, var(--yellow) ${complete}deg ${waiting}deg, var(--magenta) ${waiting}deg 360deg)`;
 }
 
+function temperatureHistory() {
+  const points = dashboardLogs()
+    .filter((log) => log.unit === "Equipment")
+    .flatMap((log) => (log.items || [])
+      .filter((item) => isEquipmentTemperatureItem(item) && item.temperature != null && item.equipmentStatus !== "ส่งซ่อม")
+      .map((item) => ({
+        date: log.inspectionDate || String(log.checkedAt || "").slice(0, 10),
+        checkedAt: log.checkedAt || "",
+        value: Number(item.temperature),
+      })))
+    .filter((point) => point.date && Number.isFinite(point.value))
+    .sort((a, b) => String(a.date || a.checkedAt).localeCompare(String(b.date || b.checkedAt)))
+    .slice(-14);
+
+  if (points.length) return points;
+
+  const range = dashboardFilterRange();
+  const today = localDate();
+  if (today < range.start || today > range.end) return [];
+  const current = data.Equipment?.find(isEquipmentTemperatureItem);
+  const value = getTemperatureValue(current);
+  return value == null ? [] : [{ date: localDate(), checkedAt: new Date().toISOString(), value }];
+}
+
+function renderTemperatureChart() {
+  if (!els.temperatureChart) return;
+  const points = temperatureHistory();
+  if (!points.length) {
+    els.temperatureChart.innerHTML = '<div class="empty-state">ยังไม่มีข้อมูลอุณหภูมิตู้เย็น</div>';
+    return;
+  }
+
+  const width = 640;
+  const height = 220;
+  const pad = { top: 18, right: 26, bottom: 34, left: 42 };
+  const minTemp = 0;
+  const maxTemp = 5;
+  const xStep = points.length > 1 ? (width - pad.left - pad.right) / (points.length - 1) : 0;
+  const x = (index) => points.length > 1 ? pad.left + index * xStep : width / 2;
+  const y = (value) => pad.top + ((maxTemp - value) / (maxTemp - minTemp)) * (height - pad.top - pad.bottom);
+  const path = points.map((point, index) => `${index ? "L" : "M"} ${x(index).toFixed(2)} ${y(point.value).toFixed(2)}`).join(" ");
+  const area = `${path} L ${x(points.length - 1).toFixed(2)} ${height - pad.bottom} L ${x(0).toFixed(2)} ${height - pad.bottom} Z`;
+  const latest = points.at(-1);
+  const average = points.reduce((sum, point) => sum + point.value, 0) / points.length;
+  const outOfRange = points.filter((point) => point.value < minTemp || point.value > maxTemp).length;
+  const labels = points.map((point, index) => {
+    if (points.length > 6 && index % Math.ceil(points.length / 5) !== 0 && index !== points.length - 1) return "";
+    return `<text x="${x(index).toFixed(2)}" y="${height - 10}" text-anchor="middle">${escapeHtml(formatShortDate(point.date))}</text>`;
+  }).join("");
+  const dots = points.map((point, index) => `<circle cx="${x(index).toFixed(2)}" cy="${y(point.value).toFixed(2)}" r="4"><title>${escapeHtml(formatDate(point.date))}: ${formatTemperature(point.value)} °C</title></circle>`).join("");
+
+  els.temperatureChart.innerHTML = `
+    <div class="temperature-chart-summary">
+      <div><span>ล่าสุด</span><strong>${formatTemperature(latest.value)} °C</strong></div>
+      <div><span>เฉลี่ย</span><strong>${formatTemperature(average)} °C</strong></div>
+      <div><span>นอกช่วง</span><strong>${outOfRange}</strong></div>
+    </div>
+    <svg class="temperature-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟอุณหภูมิตู้เย็น">
+      <line class="temp-grid-line" x1="${pad.left}" y1="${y(0)}" x2="${width - pad.right}" y2="${y(0)}"></line>
+      <line class="temp-grid-line" x1="${pad.left}" y1="${y(2.5)}" x2="${width - pad.right}" y2="${y(2.5)}"></line>
+      <line class="temp-grid-line" x1="${pad.left}" y1="${y(5)}" x2="${width - pad.right}" y2="${y(5)}"></line>
+      <text class="temp-axis-label" x="8" y="${y(0) + 4}">0</text>
+      <text class="temp-axis-label" x="8" y="${y(2.5) + 4}">2.5</text>
+      <text class="temp-axis-label" x="8" y="${y(5) + 4}">5</text>
+      <path class="temp-area" d="${area}"></path>
+      <path class="temp-line" d="${path}"></path>
+      <g class="temp-dots">${dots}</g>
+      <g class="temp-x-labels">${labels}</g>
+    </svg>
+  `;
+}
+
 function renderDashboardInsights() {
   if (activeView !== "dashboard") return;
+  const range = dashboardFilterRange();
+  els.dashboardFilterSummary.textContent = range.label;
   els.dashboardCharts.innerHTML = UNITS.map((unit) => {
     const counts = data[unit].reduce((total, item) => {
       total[itemDashboardBucket(item, unit)] += 1;
@@ -562,8 +698,10 @@ function renderDashboardInsights() {
     </article>`;
   }).join("");
 
+  renderTemperatureChart();
+
   const counts = new Map();
-  checkLogs.forEach((log) => {
+  dashboardLogs().forEach((log) => {
     const name = String(log.inspector || "").trim();
     if (name) counts.set(name, (counts.get(name) || 0) + 1);
   });
@@ -660,6 +798,9 @@ function addCheckLog(unit, inspector, checkedAt, inspectionDate, shift) {
       name: item.name,
       requiredQty: item.requiredQty,
       countedQty: item.countedQty,
+      temperature: isEquipmentTemperatureItem(item) ? getTemperatureValue(item) : null,
+      temperatureRange: isEquipmentTemperatureItem(item) ? item.temperatureRange || { min: 0, max: 5, unit: "องศาเซลเซียส" } : null,
+      equipmentStatus: isEquipmentTemperatureItem(item) ? item.equipmentStatus || "พร้อมใช้" : "",
       expiryDate: item.expiryDate,
       status: getItemStatus(item, unit).label,
       shortageReason: shortageReason(item),
@@ -681,7 +822,7 @@ function alertText(item) {
     if (status.key === "short") return "ส่งซ่อม";
     return `พร้อมใช้ · อุณหภูมิ ${formatTemperature(getTemperatureValue(item)) || "0.00"} °C`;
   }
-  if (status.key === "unknown") return "ยังไม่ระบุจำนวนที่ต้องมีในชีทต้นฉบับ";
+  if (status.key === "unknown") return "ยังไม่ระบุจำนวนที่ต้องมีใน catalog";
   if (status.key === "short") return `มี ${item.countedQty}/${item.requiredQty}${shortageReason(item) ? " · " + shortageReason(item) : ""}`;
   if (status.key === "expired") return `หมดอายุ ${formatDate(item.expiryDate)}`;
   return `เหลือ ${daysUntil(item.expiryDate)} วัน`;
@@ -742,13 +883,15 @@ function renderStockList() {
         <span>${escapeHtml(activeUnit)}</span>
         ${Number(item.countedQty) < Number(item.requiredQty) ? `<label class="shortage-label">หมายเหตุ<select class="shortage-select" aria-label="หมายเหตุ ${escapeHtml(item.name)}"><option value="">เลือกหมายเหตุ</option>${shortageReasons(activeUnit).map(reason => `<option${shortageReason(item) === reason ? " selected" : ""}>${reason}</option>`).join("")}</select></label>` : ""}
       </td>
-      <td class="number-cell">${item.requiredQty == null ? "ยังไม่ระบุ" : escapeHtml(item.requiredQty)}</td>
+      <td class="number-cell">${isEquipmentTemperatureItem(item) ? escapeHtml(getTemperatureRangeText(item)) : item.requiredQty == null ? "ยังไม่ระบุ" : escapeHtml(item.requiredQty)}</td>
       <td>
-        <div class="qty-editor table-qty-editor" aria-label="แก้ไขจำนวน">
+        ${isEquipmentTemperatureItem(item)
+          ? '<span class="muted-cell">ตรวจอุณหภูมิ</span>'
+          : `<div class="qty-editor table-qty-editor" aria-label="แก้ไขจำนวน">
           <button class="qty-button decrease" type="button">−</button>
           <input class="qty-input" type="number" min="0" step="1" />
           <button class="qty-button increase" type="button">+</button>
-        </div>
+        </div>`}
       </td>
       <td>${isEquipmentTemperatureItem(item)
         ? `<div class="temperature-check">
@@ -768,10 +911,12 @@ function renderStockList() {
     `;
 
     const input = row.querySelector(".qty-input");
-    input.value = item.countedQty;
-    input.addEventListener("change", () => updateQty(item.id, Number(input.value)));
-    row.querySelector(".decrease").addEventListener("click", () => updateQty(item.id, Math.max(0, Number(item.countedQty) - 1)));
-    row.querySelector(".increase").addEventListener("click", () => updateQty(item.id, Number(item.countedQty) + 1));
+    if (input) {
+      input.value = item.countedQty;
+      input.addEventListener("change", () => updateQty(item.id, Number(input.value)));
+      row.querySelector(".decrease").addEventListener("click", () => updateQty(item.id, Math.max(0, Number(item.countedQty) - 1)));
+      row.querySelector(".increase").addEventListener("click", () => updateQty(item.id, Number(item.countedQty) + 1));
+    }
     row.querySelector(".edit-button").addEventListener("click", () => openItemDialog(item));
     row.querySelector(".shortage-select")?.addEventListener("change", event => {
       item.shortageReason = event.target.value;
@@ -816,6 +961,7 @@ function expirySortValue(item) {
 
 function buildMeta(item) {
   const expiry = item.expiryDate ? `หมดอายุ ${formatDate(item.expiryDate)}` : "ไม่มีวันหมดอายุ";
+  if (isEquipmentTemperatureItem(item)) return `ช่วง ${getTemperatureRangeText(item)} · อุณหภูมิ ${formatTemperature(getTemperatureValue(item)) || "-"} °C`;
   return `ต้องมี ${item.requiredQty} · ${expiry}`;
 }
 
@@ -902,7 +1048,7 @@ function openItemDialog(item = null) {
   els.requiredQty.value = item ? item.requiredQty ?? "" : 1;
   els.countedQty.value = item?.countedQty ?? 0;
   els.noExpiry.checked = !item?.expiryDate;
-  els.expiryDate.value = item?.expiryDate || "";
+  els.expiryDate.value = item?.expiryDate || localDate();
   els.equipmentFields.hidden = !isTemperatureItem;
   els.equipmentStatus.value = item?.equipmentStatus || "พร้อมใช้";
   els.temperature.value = item?.temperature ?? "";
@@ -915,7 +1061,9 @@ function openItemDialog(item = null) {
 function syncExpiryField() {
   els.expiryWrap.hidden = els.noExpiry.checked;
   els.expiryDate.required = !els.noExpiry.checked;
+  els.expiryDate.disabled = els.noExpiry.checked;
   if (els.noExpiry.checked) els.expiryDate.value = "";
+  else if (!els.expiryDate.value) els.expiryDate.value = localDate();
 }
 
 function syncEquipmentFields() {
@@ -940,11 +1088,12 @@ function saveItem(event) {
   const nextItem = {
     id,
     name,
-    requiredQty: Number(els.requiredQty.value) || 0,
-    countedQty: Number(els.countedQty.value) || 0,
+    requiredQty: isTemperatureItem ? null : Number(els.requiredQty.value) || 0,
+    countedQty: isTemperatureItem ? 0 : Number(els.countedQty.value) || 0,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
     equipmentStatus,
     temperature: isTemperatureItem && equipmentStatus === "พร้อมใช้" ? temperatureValue : null,
+    temperatureRange: isTemperatureItem ? existingItem?.temperatureRange || { min: 0, max: 5, unit: "องศาเซลเซียส" } : null,
     inspector: existingItem?.inspector || "",
     checkedAt: existingItem?.checkedAt || "",
     inspectionDate: existingItem?.inspectionDate || "",
@@ -965,8 +1114,8 @@ function saveItem(event) {
 }
 
 function resetFromExcelSeed() {
-  if (!confirm("โหลดรายการและจำนวนที่ต้องมีจากชีทต้นฉบับใหม่ทุกหน้า? จำนวนที่นับ วันหมดอายุ และข้อมูลการตรวจปัจจุบันจะถูกแทนที่")) return;
-  backupBeforeSourceImport(data, `reset-${Date.now()}`);
+  if (!confirm("โหลดรายการและจำนวนที่ต้องมีจาก catalog ในระบบใหม่ทุกหน้า? จำนวนที่นับ วันหมดอายุ และข้อมูลการตรวจปัจจุบันจะถูกแทนที่")) return;
+  backupBeforeCatalogImport(data, `reset-${Date.now()}`);
   data = cloneData(defaultData);
   saveData();
   searchTerm = "";
@@ -995,7 +1144,7 @@ function recoverMissingItems() {
   els.searchInput.value = "";
   els.statusFilter.value = "all";
   render();
-  alert(recoveredCount ? `กู้รายการกลับมาแล้ว ${recoveredCount} รายการ` : "ไม่พบรายการที่หายไปจากชีทต้นฉบับ");
+  alert(recoveredCount ? `กู้รายการกลับมาแล้ว ${recoveredCount} รายการ` : "ไม่พบรายการที่หายไปจาก catalog ในระบบ");
 }
 
 function normalizeName(name) {
@@ -1129,7 +1278,7 @@ async function saveCloudState() {
 
   const payload = {
     action: "saveState",
-    sourceVersion: SOURCE_VERSION,
+    catalogVersion: CATALOG_VERSION,
     source: "med-stock",
     updatedAt: new Date().toISOString(),
     data,
@@ -1177,7 +1326,8 @@ async function clearSavedState() {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(CHECK_LOG_KEY);
   localStorage.removeItem(INSPECTORS_KEY);
-  localStorage.removeItem(SOURCE_VERSION_KEY);
+  localStorage.removeItem("med-stock-source-version");
+  localStorage.removeItem(CATALOG_VERSION_KEY);
   data = cloneData(defaultData);
   checkLogs = [];
   activeView = "home";
@@ -1203,12 +1353,7 @@ async function loadCloudState() {
     const response = await jsonpRequest(settings.googleSheetUrl, { action: "loadState" });
     if (!response?.ok || !response.state?.data) return;
 
-    let nextData = normalizeImportedData(response.state.data);
-    if (SOURCE_VERSION && response.state.sourceVersion !== SOURCE_VERSION) {
-      backupBeforeSourceImport(nextData, "cloud");
-      nextData = applySourceCatalog(nextData);
-    }
-    nextData = ensureSourceItems(nextData);
+    const nextData = ensureCatalogItems(normalizeImportedData(response.state.data));
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
     cloudSyncPaused = true;
     data = nextData;
@@ -1216,6 +1361,7 @@ async function loadCloudState() {
     renderInspectors();
     cloudSyncPaused = false;
     render();
+    void saveCloudState();
   } catch {
     cloudSyncPaused = false;
   }
@@ -1260,14 +1406,22 @@ function normalizeImportedData(importedData) {
   UNITS.forEach((unit) => {
     const keys = [unit, ...Object.keys(UNIT_ALIASES).filter(key => UNIT_ALIASES[key] === unit)];
     const seen = new Set();
-    normalized[unit] = keys.flatMap(key => Array.isArray(importedData?.[key]) ? importedData[key] : []).filter(item => {
+    const importedItems = keys.flatMap(key => Array.isArray(importedData?.[key]) ? importedData[key] : []).filter(item => {
       const identity = item.id || item.name;
       if (seen.has(identity)) return false;
       seen.add(identity);
       return true;
     });
+    const catalogNames = new Set((defaultData[unit] || []).map(item => normalizeName(item.name)));
+    const catalogBacked = importedItems.filter(item => catalogNames.has(normalizeName(item.name)));
+    const customItems = importedItems.filter(item => {
+      const hasCatalogKey = catalogNames.has(normalizeName(item.name));
+      const looksLikeOldCatalogItem = Boolean(item.sourceId && (String(item.sourceId).startsWith("rn-source-") || item.sourceId === "equipment-fridge-temperature"));
+      return !hasCatalogKey && !looksLikeOldCatalogItem;
+    });
+    normalized[unit] = [...catalogBacked, ...customItems];
   });
-  return ensureSourceItems(normalized);
+  return ensureCatalogItems(normalized);
 }
 
 async function sendTelegramMessage(message) {
@@ -1410,6 +1564,9 @@ function buildInspectionMessage(unit, inspector, checkedAt) {
 }
 
 function formatInspectionItemLine(item, unit) {
+  if (isEquipmentTemperatureItem(item)) {
+    return `- ${item.name}: ${getTemperatureRangeText(item)} | อุณหภูมิ ${formatTemperature(getTemperatureValue(item)) || "-"} °C | ${alertText({ ...item, unit })}`;
+  }
   const expiry = item.expiryDate ? `หมดอายุ ${formatDate(item.expiryDate)}` : "ไม่มีวันหมดอายุ";
   const status = alertText({ ...item, unit });
   return `- ${item.name}: ${item.countedQty}/${item.requiredQty} | ${expiry} | ${status}`;
@@ -1434,8 +1591,8 @@ function exportExcel() {
     rows.push([
       item.unit,
       item.name,
-      item.requiredQty,
-      item.countedQty,
+      isEquipmentTemperatureItem(item) ? getTemperatureRangeText(item) : item.requiredQty,
+      isEquipmentTemperatureItem(item) ? formatTemperature(getTemperatureValue(item)) : item.countedQty,
       item.expiryDate ? formatDate(item.expiryDate) : "ไม่มีวันหมดอายุ",
       item.inspector || "",
       item.inspectionDate || (item.checkedAt ? formatDateTime(item.checkedAt) : ""),
@@ -1498,7 +1655,7 @@ function escapeHtml(value) {
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify({ data, sourceVersion: SOURCE_VERSION, checkLogs, inspectors: inspectorNames(), settings: { expiryWindow: settings.expiryWindow } }, null, 2)], {
+  const blob = new Blob([JSON.stringify({ data, catalogVersion: CATALOG_VERSION, checkLogs, inspectors: inspectorNames(), settings: { expiryWindow: settings.expiryWindow } }, null, 2)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(blob);
@@ -1538,6 +1695,11 @@ function importData(event) {
 function formatDate(dateValue) {
   if (!dateValue) return "-";
   return new Intl.DateTimeFormat("th-TH", { dateStyle: "medium" }).format(new Date(`${dateValue}T00:00:00`));
+}
+
+function formatShortDate(dateValue) {
+  if (!dateValue) return "-";
+  return new Intl.DateTimeFormat("th-TH", { day: "2-digit", month: "short" }).format(new Date(`${dateValue}T00:00:00`));
 }
 
 function formatDateTime(dateValue) {

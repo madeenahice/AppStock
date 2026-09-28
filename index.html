@@ -81,11 +81,30 @@
 
       <section class="monthly-reminder" id="monthlyReminder" hidden></section>
       <section class="dashboard-insights" id="dashboardInsights" hidden>
+        <div class="dashboard-filter-bar" aria-label="ตัวกรอง Dashboard">
+          <label>
+            ช่วงเวลา
+            <select id="dashboardFilterMode">
+              <option value="month">รายเดือน</option>
+              <option value="fiscal">รายปีงบ</option>
+            </select>
+          </label>
+          <label>
+            เดือนอ้างอิง
+            <input id="dashboardFilterMonth" type="month" />
+          </label>
+          <span id="dashboardFilterSummary"></span>
+        </div>
         <div class="section-heading">
           <h2>ภาพรวมรายการ</h2>
           <p>ครบ / รอเบิก / หาไม่พบ</p>
         </div>
         <div class="pie-grid" id="dashboardCharts"></div>
+        <div class="section-heading">
+          <h2>อุณหภูมิตู้เย็น</h2>
+          <p>ย้อนหลังจากประวัติการตรวจ Equipment</p>
+        </div>
+        <div class="temperature-chart-panel" id="temperatureChart"></div>
         <div class="section-heading">
           <h2>ผู้ตรวจเช็คบ่อย</h2>
           <p>นับจากประวัติการตรวจ</p>
