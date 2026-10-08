@@ -1,4 +1,4 @@
-const UNITS = ["Med Stock", "IV Fluid", "Equipment", "CPR Box", "Emer medicine", "Emer cart Adult", "Emer cart PED"];
+const UNITS = ["Med Stock", "IV Fluid", "Equipment", "Emer medicine", "CPR Box", "Emer cart Adult", "Emer cart PED"];
 const UNIT_EXPIRY_WINDOWS = {
   "CPR Box": 180,
   "Emer medicine": 180,
@@ -239,10 +239,21 @@ function daysFromNow(days) {
 }
 
 function loadData() {
-  localStorage.removeItem?.(STORAGE_KEY);
+  const legacySourceVersion = localStorage.getItem("med-stock-source-version");
   localStorage.removeItem?.("med-stock-source-version");
-  localStorage.removeItem?.(CATALOG_VERSION_KEY);
-  return cloneData(defaultData);
+  if (legacySourceVersion) {
+    localStorage.removeItem?.(STORAGE_KEY);
+    localStorage.removeItem?.(CATALOG_VERSION_KEY);
+    return cloneData(defaultData);
+  }
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return cloneData(defaultData);
+  try {
+    return normalizeImportedData(JSON.parse(stored));
+  } catch {
+    localStorage.removeItem?.(STORAGE_KEY);
+    return cloneData(defaultData);
+  }
 }
 
 function cloneData(value) {
@@ -258,9 +269,7 @@ function applyCatalog(previous) {
   const result = {};
   const used = new Set();
   UNITS.forEach(unit => {
-    // Match operational values to the same named item when restoring a catalog.
-    const alternate = unit === "CPR Box" ? "Emer medicine" : unit === "Emer medicine" ? "CPR Box" : null;
-    const candidates = [...(previous[unit] || []), ...(alternate ? previous[alternate] || [] : [])];
+    const candidates = previous[unit] || [];
     result[unit] = defaultData[unit].map(seed => {
       const old = candidates.find(item => !used.has(item) && normalizeName(item.name) === normalizeName(seed.name));
       if (!old) return cloneData(seed);
@@ -304,6 +313,8 @@ function loadCheckLogs() {
 }
 
 function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
   queueCloudStateSave();
 }
 
@@ -1412,8 +1423,24 @@ function normalizeImportedData(importedData) {
       seen.add(identity);
       return true;
     });
-    const catalogNames = new Set((defaultData[unit] || []).map(item => normalizeName(item.name)));
-    const catalogBacked = importedItems.filter(item => catalogNames.has(normalizeName(item.name)));
+    const catalogItems = defaultData[unit] || [];
+    const catalogByName = new Map(catalogItems.map(item => [normalizeName(item.name), item]));
+    const catalogNames = new Set(catalogByName.keys());
+    const catalogBacked = importedItems
+      .filter(item => catalogNames.has(normalizeName(item.name)))
+      .map(item => {
+        const seed = catalogByName.get(normalizeName(item.name));
+        return {
+          ...cloneData(seed),
+          ...item,
+          id: item.id || seed.id,
+          sourceId: seed.sourceId,
+          name: seed.name,
+          requiredQty: seed.requiredQty,
+          expiryDate: item.expiryDate || seed.expiryDate || null,
+          temperatureRange: seed.temperatureRange || item.temperatureRange || null,
+        };
+      });
     const customItems = importedItems.filter(item => {
       const hasCatalogKey = catalogNames.has(normalizeName(item.name));
       const looksLikeOldCatalogItem = Boolean(item.sourceId && (String(item.sourceId).startsWith("rn-source-") || item.sourceId === "equipment-fridge-temperature"));
