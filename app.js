@@ -274,7 +274,7 @@ function applyCatalog(previous) {
       const old = candidates.find(item => !used.has(item) && normalizeName(item.name) === normalizeName(seed.name));
       if (!old) return cloneData(seed);
       used.add(old);
-      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: seed.requiredQty };
+      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: seed.requiredQty, countedQty: seed.countedQty };
     });
   });
   return result;
@@ -1437,6 +1437,7 @@ function normalizeImportedData(importedData) {
           sourceId: seed.sourceId,
           name: seed.name,
           requiredQty: seed.requiredQty,
+          countedQty: seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
           temperatureRange: seed.temperatureRange || item.temperatureRange || null,
         };
