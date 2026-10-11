@@ -1,6 +1,6 @@
 # รายการในระบบ
 
-แหล่งข้อมูล: catalog-data.json (manual-catalog-20261011-6)
+แหล่งข้อมูล: catalog-data.json (manual-catalog-20261011-7)
 
 ## Med Stock (17 รายการ)
 
@@ -67,7 +67,7 @@
 - Ventolin 2.5 ml — จำนวนที่ต้องมี 2
 - 2% Lidocain without Adrenaline (20mg/ml ) — จำนวนที่ต้องมี 3
 
-## Emer medicine (18 รายการ)
+## Emer medicine (17 รายการ)
 
 - Adrenaline (1:1000) 1 mg — จำนวนที่ต้องมี 15
 - Atropine 0.6 mg — จำนวนที่ต้องมี 6
@@ -82,7 +82,6 @@
 - Dexamethasone 4 mg — จำนวนที่ต้องมี 2
 - Chlorpheniramine10mg/1ml — จำนวนที่ต้องมี 1
 - Diazepam 10 mg. — จำนวนที่ต้องมี 1
-- Dopamine injection 200 mg 10 ml *เฉพาะหน่วยไตเทียม — จำนวนที่ต้องมี 0
 - 0.9% NSS 100 ml. — จำนวนที่ต้องมี 1
 - D5W 100 ml — จำนวนที่ต้องมี 1
 - D5W 250 ml — จำนวนที่ต้องมี 1
