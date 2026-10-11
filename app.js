@@ -15,6 +15,7 @@ const REQUIRED_BASELINE_KEY = "med-stock-required-baseline-version";
 const SETTINGS_KEY = "cute-med-stock-settings-v1";
 const CHECK_LOG_KEY = "cute-med-stock-check-log-v1";
 const SIDEBAR_KEY = "cute-med-stock-sidebar-collapsed-v1";
+const SUCCESS_TOAST_MESSAGE = "Have a good day at work 🙂";
 const DEFAULT_GOOGLE_SHEET_URL =
   "https://script.google.com/macros/s/AKfycbyHQUM1t-0XtfBQ6TyORkf3aT5vJdJfI4OUBU5LtK3WjH0hpPvcrrTz9KB0_1FY3D9S/exec";
 const LEGACY_GOOGLE_SHEET_URLS = [
@@ -1189,7 +1190,7 @@ async function saveInspection() {
   try {
     const sent = await sendInspectionToGoogleSheet(checkLog);
     if (canSendTelegram()) await sendTelegramMessage(telegramMessage);
-    showToast(sent ? "บันทึก Google Sheet สำเร็จ · ปีงบประมาณ " + checkLog.fiscalYear : "บันทึกในเครื่องแล้ว แต่ยังยืนยัน Google Sheet ไม่ได้");
+    showToast(sent ? SUCCESS_TOAST_MESSAGE : "บันทึกในเครื่องแล้ว แต่ยังยืนยัน Google Sheet ไม่ได้");
   } finally {
     els.saveInspectionButton.disabled = false;
   }
@@ -1266,7 +1267,7 @@ function saveItem(event) {
   saveData();
   els.itemDialog.close();
   render();
-  showToast("บันทึกสำเร็จ");
+  showToast(SUCCESS_TOAST_MESSAGE);
 }
 
 function resetFromExcelSeed() {
@@ -1337,7 +1338,7 @@ function saveSettingsForm(event) {
   saveSettings();
   els.settingsDialog.close();
   render();
-  showToast("บันทึกสำเร็จ");
+  showToast(SUCCESS_TOAST_MESSAGE);
 }
 
 function showToast(message) {
