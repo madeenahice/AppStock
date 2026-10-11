@@ -237,14 +237,15 @@ h1 {
 
 .dashboard-insights {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto auto auto auto auto auto;
   min-height: 0;
   margin-top: 10px;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .dashboard-view .content-shell {
-  grid-template-rows: auto auto minmax(360px, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr);
   overflow-y: auto;
 }
 
@@ -254,10 +255,12 @@ h1 {
 
 .dashboard-filter-bar {
   display: grid;
-  grid-template-columns: minmax(150px, auto) minmax(180px, auto) minmax(0, 1fr);
+  grid-template-columns: minmax(140px, 160px) minmax(180px, 190px) minmax(180px, 1fr);
   gap: 10px;
   align-items: end;
-  padding: 12px 12px 0;
+  padding: 14px 14px 8px;
+  border-bottom: 1px solid rgba(222, 215, 204, 0.75);
+  background: linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(255, 253, 247, 0.9));
 }
 
 .dashboard-filter-bar label {
@@ -289,19 +292,20 @@ h1 {
 
 .pie-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
   min-height: 0;
-  padding: 12px;
-  overflow: auto;
+  padding: 12px 14px 16px;
+  overflow: visible;
 }
 
 .pie-card {
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 11px;
   align-items: center;
   min-width: 0;
+  min-height: 116px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -310,8 +314,8 @@ h1 {
 
 .pie-chart {
   position: relative;
-  width: 82px;
-  height: 82px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgba(234, 221, 227, 0.9);
 }
@@ -319,7 +323,7 @@ h1 {
 .pie-chart::after {
   content: "";
   position: absolute;
-  inset: 18px;
+  inset: 16px;
   border-radius: 50%;
   background: var(--surface);
 }
@@ -378,7 +382,11 @@ h1 {
 .temperature-chart-panel {
   display: grid;
   gap: 10px;
+  margin: 0 14px 16px;
   padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
 }
 
 .temperature-chart-summary {
@@ -408,10 +416,39 @@ h1 {
   font-size: 1.05rem;
 }
 
+.temperature-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.temperature-chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.temperature-chart-legend i {
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+}
+
+.temperature-chart-legend .baseline-key {
+  background: repeating-linear-gradient(90deg, var(--orange) 0 5px, transparent 5px 8px);
+}
+
 .temperature-chart {
   width: 100%;
-  min-height: 210px;
-  overflow: visible;
+  aspect-ratio: 4 / 1;
+  max-height: 240px;
+  min-height: 160px;
+  display: block;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fffdf7;
@@ -420,6 +457,13 @@ h1 {
 .temp-grid-line {
   stroke: rgba(15, 66, 103, 0.16);
   stroke-width: 1;
+}
+
+.temp-baseline-line {
+  stroke: var(--orange);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+  opacity: 0.9;
 }
 
 .temp-axis-label,
@@ -449,9 +493,9 @@ h1 {
 
 .inspector-heatmap {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 8px;
-  padding: 12px;
+  padding: 0 14px 14px;
 }
 
 .heatmap-cell {
@@ -935,7 +979,15 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 14px 0;
+  padding: 14px 14px 8px;
+}
+
+.dashboard-insights > .section-heading {
+  border-top: 1px solid rgba(222, 215, 204, 0.58);
+}
+
+.dashboard-insights > .section-heading:first-of-type {
+  border-top: 0;
 }
 
 .section-heading h2 {
@@ -978,16 +1030,47 @@ h1 {
   color: #765c00;
 }
 
-.alert-item.expired {
+.alert-item.status-expired {
   border-color: #efa6a0;
   background: var(--red-soft);
   color: #a92620;
 }
 
-.alert-item.short {
+.alert-item.status-short,
+.alert-item.status-repair {
   border-color: #d9b9f0;
   background: var(--purple-soft);
   color: #8140aa;
+}
+
+.alert-item.status-waiting {
+  border-color: #f2cf44;
+  background: #fff1ad;
+  color: #765c00;
+}
+
+.alert-item.status-missing {
+  border-color: #f09c95;
+  background: #ffd5d1;
+  color: #a92620;
+}
+
+.alert-item.status-borrowed {
+  border-color: #9ccbff;
+  background: #d4e7ff;
+  color: #0f6098;
+}
+
+.alert-item.status-expiring {
+  border-color: #f0d15f;
+  background: var(--amber-soft);
+  color: #765c00;
+}
+
+.alert-item.status-unknown {
+  border-color: #cbd5e1;
+  background: #eef2f7;
+  color: #526173;
 }
 
 .empty-state {
@@ -1087,6 +1170,35 @@ h1 {
   background: #eef7ff;
 }
 
+.stock-table tbody tr.status-expired {
+  background: var(--red-soft);
+}
+
+.stock-table tbody tr.status-expiring {
+  background: var(--amber-soft);
+}
+
+.stock-table tbody tr.status-short,
+.stock-table tbody tr.status-repair {
+  background: var(--purple-soft);
+}
+
+.stock-table tbody tr.status-waiting {
+  background: #fff1ad;
+}
+
+.stock-table tbody tr.status-missing {
+  background: #ffd5d1;
+}
+
+.stock-table tbody tr.status-borrowed {
+  background: #d4e7ff;
+}
+
+.stock-table tbody tr.status-unknown {
+  background: #eef2f7;
+}
+
 .stock-table strong {
   display: block;
   margin-bottom: 3px;
@@ -1163,6 +1275,26 @@ h1 {
 .status-pill.danger {
   color: #a92620;
   background: var(--red-soft);
+}
+
+.status-pill.waiting {
+  color: #765c00;
+  background: #fff1ad;
+}
+
+.status-pill.missing {
+  color: #a92620;
+  background: #ffd5d1;
+}
+
+.status-pill.borrowed {
+  color: #0f6098;
+  background: #d4e7ff;
+}
+
+.status-pill.repair {
+  color: #8140aa;
+  background: var(--purple-soft);
 }
 
 .qty-editor {
@@ -1485,7 +1617,7 @@ h1 {
   }
 
   .dashboard-view .content-shell {
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
   }
 
   .dashboard-filter-bar {
@@ -1498,7 +1630,7 @@ h1 {
   }
 
   .pie-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 
   .temperature-chart-summary {
@@ -1506,7 +1638,7 @@ h1 {
   }
 
   .inspector-heatmap {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
   }
 
   .info-grid {
@@ -1586,7 +1718,7 @@ h1 {
   .pie-grid {
     grid-template-columns: 1fr;
     gap: 8px;
-    padding: 10px;
+    padding: 10px 10px 14px;
   }
 
   .dashboard-filter-bar {
@@ -1609,6 +1741,7 @@ h1 {
   }
 
   .temperature-chart-panel {
+    margin: 0 10px 14px;
     padding: 10px;
   }
 
@@ -1618,7 +1751,7 @@ h1 {
 
   .inspector-heatmap {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 10px;
+    padding: 0 10px 10px;
   }
 
   .summary-panel {

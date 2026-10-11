@@ -1,6 +1,6 @@
 # รายการในระบบ
 
-แหล่งข้อมูล: catalog-data.json (manual-catalog-20260928-1)
+แหล่งข้อมูล: catalog-data.json (manual-catalog-20261011-6)
 
 ## Med Stock (17 รายการ)
 
@@ -47,28 +47,7 @@
 - Ultrasound — จำนวนที่ต้องมี 1
 - อุณหภูมิตู้เย็น — จำนวนที่ต้องมี 0.00-5.00 °C
 
-## CPR Box (18 รายการ)
-
-- Adrenaline (1:1000) 1 mg — จำนวนที่ต้องมี 15
-- Atropine 0.6 mg — จำนวนที่ต้องมี 6
-- Adenosine 6 mg/2ml — จำนวนที่ต้องมี 5
-- 10% Calcium gluconate — จำนวนที่ต้องมี 6
-- 7.5% NaCHO3 50 ml — จำนวนที่ต้องมี 3
-- 50% MgSO4 2 ml — จำนวนที่ต้องมี 2
-- 50% Glucose 50 ml — จำนวนที่ต้องมี 1
-- Amiodarone 150 mg — จำนวนที่ต้องมี 3
-- 2% Lidocaine (Free Preservative) — จำนวนที่ต้องมี 3
-- Norepinephrine 4 mg/4ml — จำนวนที่ต้องมี 1
-- Dexamethasone 4 mg — จำนวนที่ต้องมี 2
-- Chlorpheniramine10mg/1ml — จำนวนที่ต้องมี 1
-- Diazepam 10 mg. — จำนวนที่ต้องมี 1
-- Dopamine injection 200 mg 10 ml *เฉพาะหน่วยไตเทียม — จำนวนที่ต้องมี 1
-- 0.9% NSS 100 ml. — จำนวนที่ต้องมี 1
-- D5W 100 ml — จำนวนที่ต้องมี 1
-- D5W 250 ml — จำนวนที่ต้องมี 1
-- 0.9% NSS 1000 ml. — จำนวนที่ต้องมี 2
-
-## Emer medicine (17 รายการ)
+## CPR Box (17 รายการ)
 
 - Adrenaline Injection 1 mg/ml (1:1000) — จำนวนที่ต้องมี 10
 - Atropine 0.6 mg 1 ml — จำนวนที่ต้องมี 2
@@ -87,6 +66,27 @@
 - Beradual forte 4 ml — จำนวนที่ต้องมี 2
 - Ventolin 2.5 ml — จำนวนที่ต้องมี 2
 - 2% Lidocain without Adrenaline (20mg/ml ) — จำนวนที่ต้องมี 3
+
+## Emer medicine (18 รายการ)
+
+- Adrenaline (1:1000) 1 mg — จำนวนที่ต้องมี 15
+- Atropine 0.6 mg — จำนวนที่ต้องมี 6
+- Adenosine 6 mg/2ml — จำนวนที่ต้องมี 5
+- 10% Calcium gluconate — จำนวนที่ต้องมี 6
+- 7.5% NaCHO3 50 ml — จำนวนที่ต้องมี 3
+- 50% MgSO4 2 ml — จำนวนที่ต้องมี 2
+- 50% Glucose 50 ml — จำนวนที่ต้องมี 1
+- Amiodarone 150 mg — จำนวนที่ต้องมี 3
+- 2% Lidocaine (Free Preservative) — จำนวนที่ต้องมี 3
+- Norepinephrine 4 mg/4ml — จำนวนที่ต้องมี 1
+- Dexamethasone 4 mg — จำนวนที่ต้องมี 2
+- Chlorpheniramine10mg/1ml — จำนวนที่ต้องมี 1
+- Diazepam 10 mg. — จำนวนที่ต้องมี 1
+- Dopamine injection 200 mg 10 ml *เฉพาะหน่วยไตเทียม — จำนวนที่ต้องมี 0
+- 0.9% NSS 100 ml. — จำนวนที่ต้องมี 1
+- D5W 100 ml — จำนวนที่ต้องมี 1
+- D5W 250 ml — จำนวนที่ต้องมี 1
+- 0.9% NSS 1000 ml. — จำนวนที่ต้องมี 1
 
 ## Emer cart Adult (48 รายการ)
 
@@ -139,21 +139,19 @@
 - ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line) — จำนวนที่ต้องมี 0
 - CPR Board — จำนวนที่ต้องมี 1
 
-## Emer cart PED (60 รายการ)
+## Emer cart PED (56 รายการ)
 
-- Laryngoscope handle — จำนวนที่ต้องมี 1
-- blade (Ped) no.00 ตรง — จำนวนที่ต้องมี 1
-- blade (Ped) no.0 ตรง — จำนวนที่ต้องมี 1
-- blade (Ped) no.1 ตรง — จำนวนที่ต้องมี 1
-- blade (Ped) no.00, 0, 1ตรง, — จำนวนที่ต้องมี 1
-- blade (Ped) 1 โค้ง — จำนวนที่ต้องมี 1
-- blade (Ped) 2 โค้ง — จำนวนที่ต้องมี 1
+- Laryngoscope handle ในกล่อง — จำนวนที่ต้องมี 1
+- blade (Ped) no.00 ตรง ในกล่อง — จำนวนที่ต้องมี 1
+- blade (Ped) no.0 ตรง ในกล่อง — จำนวนที่ต้องมี 1
+- blade (Ped) no.1 ตรง ในกล่อง — จำนวนที่ต้องมี 1
+- blade (Ped) 2 โค้ง  ในกล่อง — จำนวนที่ต้องมี 1
 - Stethoscope — จำนวนที่ต้องมี 1
 - กรรไกร — จำนวนที่ต้องมี 1
-- Bladeตรง no.0 — จำนวนที่ต้องมี 1
-- Bladeตรง no.1 — จำนวนที่ต้องมี 1
-- face mask no.0 — จำนวนที่ต้องมี 1
-- face mask no.1 — จำนวนที่ต้องมี 1
+- Bladeตรง no.0 ชั้น 1 — จำนวนที่ต้องมี 1
+- Bladeตรง no.1 ชั้น 1 — จำนวนที่ต้องมี 1
+- face mask no.0 ชั้น 1 — จำนวนที่ต้องมี 1
+- face mask no.1 ชั้น 1 — จำนวนที่ต้องมี 1
 - Sterlile syring ball no.0 — จำนวนที่ต้องมี 1
 - Sterlile syring ball no.1 — จำนวนที่ต้องมี 1
 - ปรอทวัดทางทวาร — จำนวนที่ต้องมี 2
@@ -181,9 +179,7 @@
 - Suction no.8 — จำนวนที่ต้องมี 2
 - Suction no.10 — จำนวนที่ต้องมี 2
 - Strap tube/ Sterile gel /syring 3 ml — จำนวนที่ต้องมี 3
-- Face mask no.0 — จำนวนที่ต้องมี 7
-- Face mask no.1 — จำนวนที่ต้องมี 8
-- Face mask no.2 — จำนวนที่ต้องมี 5
+- Face mask no.2 — จำนวนที่ต้องมี 4
 - O2 mask with bag (Ped) — จำนวนที่ต้องมี 2
 - Ambu-bag (Neonatal) — จำนวนที่ต้องมี 1
 - Ambu-bag (Ped) — จำนวนที่ต้องมี 1

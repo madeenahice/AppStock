@@ -11,6 +11,7 @@ const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่�
 const STORAGE_KEY = "cute-med-stock-v3";
 const CATALOG_VERSION_KEY = "med-stock-catalog-version";
 const CATALOG_VERSION = window.SEED_CATALOG_VERSION || "";
+const REQUIRED_BASELINE_KEY = "med-stock-required-baseline-version";
 const SETTINGS_KEY = "cute-med-stock-settings-v1";
 const CHECK_LOG_KEY = "cute-med-stock-check-log-v1";
 const SIDEBAR_KEY = "cute-med-stock-sidebar-collapsed-v1";
@@ -48,6 +49,7 @@ const defaultData = hydrateSeed(window.SEED_STOCK_DATA || sampleData);
 let data = loadData();
 let settings = loadSettings();
 let checkLogs = loadCheckLogs();
+data = applyLatestCheckStateToData(data);
 let activeUnit = UNITS[0];
 let activeView = "home";
 let searchTerm = "";
@@ -243,13 +245,15 @@ function loadData() {
   localStorage.removeItem?.("med-stock-source-version");
   if (legacySourceVersion) {
     localStorage.removeItem?.(STORAGE_KEY);
+    localStorage.removeItem?.(CHECK_LOG_KEY);
     localStorage.removeItem?.(CATALOG_VERSION_KEY);
+    localStorage.removeItem?.(REQUIRED_BASELINE_KEY);
     return cloneData(defaultData);
   }
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return cloneData(defaultData);
   try {
-    return normalizeImportedData(JSON.parse(stored));
+    return normalizeImportedData(JSON.parse(stored), { preserveRequiredQty: localStorage.getItem(REQUIRED_BASELINE_KEY) === CATALOG_VERSION });
   } catch {
     localStorage.removeItem?.(STORAGE_KEY);
     return cloneData(defaultData);
@@ -274,7 +278,7 @@ function applyCatalog(previous) {
       const old = candidates.find(item => !used.has(item) && normalizeName(item.name) === normalizeName(seed.name));
       if (!old) return cloneData(seed);
       used.add(old);
-      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: seed.requiredQty, countedQty: seed.countedQty };
+      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: Number.isFinite(Number(old.requiredQty)) ? Number(old.requiredQty) : seed.requiredQty, countedQty: Number.isFinite(Number(old.countedQty)) ? Number(old.countedQty) : seed.countedQty };
     });
   });
   return result;
@@ -308,13 +312,19 @@ function loadSettings() {
 }
 
 function loadCheckLogs() {
-  localStorage.removeItem?.(CHECK_LOG_KEY);
-  return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CHECK_LOG_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit })) : [];
+  } catch {
+    localStorage.removeItem?.(CHECK_LOG_KEY);
+    return [];
+  }
 }
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
+  localStorage.setItem(REQUIRED_BASELINE_KEY, CATALOG_VERSION);
   queueCloudStateSave();
 }
 
@@ -323,6 +333,7 @@ function saveSettings() {
 }
 
 function saveCheckLogs() {
+  localStorage.setItem(CHECK_LOG_KEY, JSON.stringify(checkLogs));
   queueCloudStateSave();
 }
 
@@ -520,8 +531,73 @@ function shortageReason(item, unit = item.unit || activeUnit) {
   return Number(item.countedQty) < Number(item.requiredQty) && shortageReasons(unit).includes(item.shortageReason) ? item.shortageReason : "";
 }
 
+function latestUnitLog(unit) {
+  return checkLogs
+    .filter(log => (UNIT_ALIASES[log.unit] || log.unit) === unit)
+    .sort((a, b) => String(b.checkedAt || b.inspectionDate || "").localeCompare(String(a.checkedAt || a.inspectionDate || "")))[0] || null;
+}
+
+function latestItemState(item, unit = item.unit || activeUnit) {
+  const latestLog = latestUnitLog(unit);
+  const latestItem = latestLog?.items?.find(entry => normalizeName(entry.name) === normalizeName(item.name));
+  if (!latestItem) return { ...item, unit };
+  return {
+    ...item,
+    ...latestItem,
+    unit,
+    inspector: latestLog.inspector || item.inspector || "",
+    checkedAt: latestLog.checkedAt || item.checkedAt || "",
+    inspectionDate: latestLog.inspectionDate || item.inspectionDate || "",
+    shift: latestLog.shift || item.shift || "",
+    sourceId: item.sourceId,
+    id: item.id,
+    name: item.name,
+    requiredQty: item.requiredQty,
+    temperatureRange: item.temperatureRange || latestItem.temperatureRange || null,
+  };
+}
+
+function applyLatestCheckStateToData(sourceData) {
+  const nextData = cloneData(sourceData);
+  UNITS.forEach(unit => {
+    const latestLog = latestUnitLog(unit);
+    if (!latestLog?.items?.length || !Array.isArray(nextData[unit])) return;
+    nextData[unit].forEach(item => {
+      const latestItem = latestLog.items.find(entry => normalizeName(entry.name) === normalizeName(item.name));
+      if (!latestItem) return;
+      if (Number.isFinite(Number(latestItem.countedQty))) item.countedQty = Number(latestItem.countedQty);
+      if ("expiryDate" in latestItem) item.expiryDate = latestItem.expiryDate || null;
+      item.shortageReason = latestItem.shortageReason || "";
+      item.inspector = latestLog.inspector || item.inspector || "";
+      item.checkedAt = latestLog.checkedAt || item.checkedAt || "";
+      item.inspectionDate = latestLog.inspectionDate || item.inspectionDate || "";
+      item.shift = latestLog.shift || item.shift || "";
+      if (isEquipmentTemperatureItem(item)) {
+        item.equipmentStatus = latestItem.equipmentStatus || item.equipmentStatus || "พร้อมใช้";
+        item.temperature = latestItem.temperature == null ? item.temperature ?? null : Number(latestItem.temperature);
+        item.temperatureRange = item.temperatureRange || latestItem.temperatureRange || { min: 0, max: 5, unit: "องศาเซลเซียส" };
+      }
+      if (Number(item.countedQty) >= Number(item.requiredQty)) item.shortageReason = "";
+    });
+  });
+  return nextData;
+}
+
+function latestItemsForUnit(unit) {
+  return (data[unit] || []).map(item => latestItemState(item, unit));
+}
+
+function latestAllItems() {
+  return UNITS.flatMap(unit => latestItemsForUnit(unit));
+}
+
+function statusMatchesFilter(item, unit = item.unit || activeUnit) {
+  const status = getItemStatus(item, unit);
+  return statusFilter === "all" || status.key === statusFilter || (statusFilter === "short" && status.group === "short");
+}
+
 function renderShortageOverview() {
-  const items = getAllItems();
+  const items = latestAllItems();
   const groups = [
     { reason: "รอเบิก", tone: "amber", icon: '<path d="M5 7h14v13H5zM9 7V4h6v3M9 12h6M12 9v6"/>' },
     { reason: "ตามไม่ได้", tone: "rose", icon: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M8.5 8.5l4 4m0-4-4 4"/>' },
@@ -563,18 +639,25 @@ function getTemperatureRangeText(item) {
 
 function getItemStatus(item, unit = item.unit || activeUnit) {
   if (isEquipmentTemperatureItem(item)) {
-    if (item.equipmentStatus === "ส่งซ่อม") return { key: "short", label: "ส่งซ่อม" };
-    return { key: "ok", label: "พร้อมใช้" };
+    if (item.equipmentStatus === "ส่งซ่อม") return { key: "repair", group: "short", label: "ส่งซ่อม" };
+    return { key: "ok", group: "ok", label: "พร้อมใช้" };
   }
 
-  if (item.requiredQty == null) return { key: "unknown", label: "ยังไม่ระบุจำนวนที่ต้องมี" };
-  if (Number(item.countedQty) < Number(item.requiredQty)) return { key: "short", label: "ต้องเติม" };
-  if (!item.expiryDate) return { key: "ok", label: "พร้อมใช้" };
+  if (item.requiredQty == null) return { key: "unknown", group: "unknown", label: "ยังไม่ระบุจำนวนที่ต้องมี" };
+  if (Number(item.countedQty) < Number(item.requiredQty)) {
+    const reason = shortageReason(item, unit);
+    if (reason === "รอเบิก") return { key: "waiting", group: "short", label: "รอเบิก" };
+    if (reason === "ตามไม่ได้") return { key: "missing", group: "short", label: "ตามไม่ได้" };
+    if (reason === "ถูกยืม") return { key: "borrowed", group: "short", label: "ถูกยืม" };
+    if (reason === "ส่งซ่อม") return { key: "repair", group: "short", label: "ส่งซ่อม" };
+    return { key: "short", group: "short", label: "ต่ำกว่าเกณฑ์" };
+  }
+  if (!item.expiryDate) return { key: "ok", group: "ok", label: "พร้อมใช้" };
 
   const days = daysUntil(item.expiryDate);
-  if (days < 0) return { key: "expired", label: "หมดอายุ" };
-  if (days <= getExpiryWindow(unit)) return { key: "expiring", label: "ใกล้หมดอายุ" };
-  return { key: "ok", label: "พร้อมใช้" };
+  if (days < 0) return { key: "expired", group: "expired", label: "หมดอายุ" };
+  if (days <= getExpiryWindow(unit)) return { key: "expiring", group: "expiring", label: "ใกล้หมดอายุ" };
+  return { key: "ok", group: "ok", label: "พร้อมใช้" };
 }
 
 function getExpiryWindow(unit) {
@@ -591,12 +674,12 @@ function daysUntil(dateValue) {
 function renderDashboard() {
   const items =
     activeView !== "unit"
-      ? getAllItems()
-      : data[activeUnit].map((item) => ({ ...item, unit: activeUnit }));
+      ? latestAllItems()
+      : latestItemsForUnit(activeUnit);
   els.totalItems.textContent = items.length;
   els.expiringItems.textContent = items.filter((item) => getItemStatus(item, item.unit).key === "expiring").length;
   els.expiredItems.textContent = items.filter((item) => getItemStatus(item, item.unit).key === "expired").length;
-  els.shortItems.textContent = items.filter((item) => getItemStatus(item, item.unit).key === "short").length;
+  els.shortItems.textContent = items.filter((item) => getItemStatus(item, item.unit).group === "short").length;
   renderDashboardInsights();
 }
 
@@ -614,6 +697,12 @@ function dashboardPieStyle(counts) {
   return `conic-gradient(var(--mint) 0 ${complete}deg, var(--yellow) ${complete}deg ${waiting}deg, var(--magenta) ${waiting}deg 360deg)`;
 }
 
+const TEMPERATURE_SHIFT_SERIES = [
+  { key: "เวรเช้า", label: "เช้า", color: "#219dff" },
+  { key: "เวรบ่าย", label: "บ่าย", color: "#d273ff" },
+  { key: "เวรดึก", label: "ดึก", color: "#0f4267" },
+];
+
 function temperatureHistory() {
   const points = dashboardLogs()
     .filter((log) => log.unit === "Equipment")
@@ -622,11 +711,11 @@ function temperatureHistory() {
       .map((item) => ({
         date: log.inspectionDate || String(log.checkedAt || "").slice(0, 10),
         checkedAt: log.checkedAt || "",
+        shift: log.shift || item.shift || "",
         value: Number(item.temperature),
       })))
     .filter((point) => point.date && Number.isFinite(point.value))
-    .sort((a, b) => String(a.date || a.checkedAt).localeCompare(String(b.date || b.checkedAt)))
-    .slice(-14);
+    .sort((a, b) => String(a.date || a.checkedAt).localeCompare(String(b.date || b.checkedAt)));
 
   if (points.length) return points;
 
@@ -635,7 +724,7 @@ function temperatureHistory() {
   if (today < range.start || today > range.end) return [];
   const current = data.Equipment?.find(isEquipmentTemperatureItem);
   const value = getTemperatureValue(current);
-  return value == null ? [] : [{ date: localDate(), checkedAt: new Date().toISOString(), value }];
+  return value == null ? [] : [{ date: localDate(), checkedAt: new Date().toISOString(), shift: current.shift || "", value }];
 }
 
 function renderTemperatureChart() {
@@ -649,21 +738,34 @@ function renderTemperatureChart() {
   const width = 640;
   const height = 220;
   const pad = { top: 18, right: 26, bottom: 34, left: 42 };
-  const minTemp = 0;
-  const maxTemp = 5;
-  const xStep = points.length > 1 ? (width - pad.left - pad.right) / (points.length - 1) : 0;
-  const x = (index) => points.length > 1 ? pad.left + index * xStep : width / 2;
-  const y = (value) => pad.top + ((maxTemp - value) / (maxTemp - minTemp)) * (height - pad.top - pad.bottom);
-  const path = points.map((point, index) => `${index ? "L" : "M"} ${x(index).toFixed(2)} ${y(point.value).toFixed(2)}`).join(" ");
-  const area = `${path} L ${x(points.length - 1).toFixed(2)} ${height - pad.bottom} L ${x(0).toFixed(2)} ${height - pad.bottom} Z`;
+  const baselineMin = 0;
+  const baselineMax = 5;
+  const values = points.map(point => point.value);
+  const minTemp = Math.min(baselineMin, ...values);
+  const maxTemp = Math.max(baselineMax, ...values);
+  const dates = [...new Set(points.map(point => point.date))];
+  const dateIndex = new Map(dates.map((date, index) => [date, index]));
+  const xStep = dates.length > 1 ? (width - pad.left - pad.right) / (dates.length - 1) : 0;
+  const x = (date) => dates.length > 1 ? pad.left + (dateIndex.get(date) || 0) * xStep : width / 2;
+  const y = (value) => pad.top + ((maxTemp - value) / (maxTemp - minTemp || 1)) * (height - pad.top - pad.bottom);
   const latest = points.at(-1);
   const average = points.reduce((sum, point) => sum + point.value, 0) / points.length;
-  const outOfRange = points.filter((point) => point.value < minTemp || point.value > maxTemp).length;
-  const labels = points.map((point, index) => {
-    if (points.length > 6 && index % Math.ceil(points.length / 5) !== 0 && index !== points.length - 1) return "";
-    return `<text x="${x(index).toFixed(2)}" y="${height - 10}" text-anchor="middle">${escapeHtml(formatShortDate(point.date))}</text>`;
+  const outOfRange = points.filter((point) => point.value < baselineMin || point.value > baselineMax).length;
+  const labels = dates.map((date, index) => {
+    if (dates.length > 6 && index % Math.ceil(dates.length / 5) !== 0 && index !== dates.length - 1) return "";
+    return `<text x="${x(date).toFixed(2)}" y="${height - 10}" text-anchor="middle">${escapeHtml(formatShortDate(date))}</text>`;
   }).join("");
-  const dots = points.map((point, index) => `<circle cx="${x(index).toFixed(2)}" cy="${y(point.value).toFixed(2)}" r="4"><title>${escapeHtml(formatDate(point.date))}: ${formatTemperature(point.value)} °C</title></circle>`).join("");
+  const series = TEMPERATURE_SHIFT_SERIES
+    .map(seriesMeta => ({ ...seriesMeta, points: points.filter(point => point.shift === seriesMeta.key) }))
+    .filter(seriesMeta => seriesMeta.points.length);
+  const fallbackPoints = points.filter(point => !TEMPERATURE_SHIFT_SERIES.some(seriesMeta => seriesMeta.key === point.shift));
+  if (fallbackPoints.length) series.push({ key: "other", label: "อื่น ๆ", color: "#4f9c4e", points: fallbackPoints });
+  const lines = series.map(seriesMeta => {
+    const path = seriesMeta.points.map((point, index) => `${index ? "L" : "M"} ${x(point.date).toFixed(2)} ${y(point.value).toFixed(2)}`).join(" ");
+    return `<path class="temp-line" d="${path}" style="stroke:${seriesMeta.color}"></path>`;
+  }).join("");
+  const dots = series.flatMap(seriesMeta => seriesMeta.points.map(point => `<circle cx="${x(point.date).toFixed(2)}" cy="${y(point.value).toFixed(2)}" r="4" style="fill:${seriesMeta.color}"><title>${escapeHtml(seriesMeta.label)} ${escapeHtml(formatDate(point.date))}: ${formatTemperature(point.value)} °C</title></circle>`)).join("");
+  const legend = `${series.map(seriesMeta => `<span><i style="background:${seriesMeta.color}"></i>${escapeHtml(seriesMeta.label)}</span>`).join("")}<span><i class="baseline-key"></i>Baseline 0-5 °C</span>`;
 
   els.temperatureChart.innerHTML = `
     <div class="temperature-chart-summary">
@@ -671,15 +773,15 @@ function renderTemperatureChart() {
       <div><span>เฉลี่ย</span><strong>${formatTemperature(average)} °C</strong></div>
       <div><span>นอกช่วง</span><strong>${outOfRange}</strong></div>
     </div>
+    <div class="temperature-chart-legend">${legend}</div>
     <svg class="temperature-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟอุณหภูมิตู้เย็น">
-      <line class="temp-grid-line" x1="${pad.left}" y1="${y(0)}" x2="${width - pad.right}" y2="${y(0)}"></line>
+      <line class="temp-baseline-line" x1="${pad.left}" y1="${y(baselineMin)}" x2="${width - pad.right}" y2="${y(baselineMin)}"></line>
       <line class="temp-grid-line" x1="${pad.left}" y1="${y(2.5)}" x2="${width - pad.right}" y2="${y(2.5)}"></line>
-      <line class="temp-grid-line" x1="${pad.left}" y1="${y(5)}" x2="${width - pad.right}" y2="${y(5)}"></line>
-      <text class="temp-axis-label" x="8" y="${y(0) + 4}">0</text>
+      <line class="temp-baseline-line" x1="${pad.left}" y1="${y(baselineMax)}" x2="${width - pad.right}" y2="${y(baselineMax)}"></line>
+      <text class="temp-axis-label" x="8" y="${y(baselineMin) + 4}">0</text>
       <text class="temp-axis-label" x="8" y="${y(2.5) + 4}">2.5</text>
-      <text class="temp-axis-label" x="8" y="${y(5) + 4}">5</text>
-      <path class="temp-area" d="${area}"></path>
-      <path class="temp-line" d="${path}"></path>
+      <text class="temp-axis-label" x="8" y="${y(baselineMax) + 4}">5</text>
+      ${lines}
       <g class="temp-dots">${dots}</g>
       <g class="temp-x-labels">${labels}</g>
     </svg>
@@ -691,7 +793,7 @@ function renderDashboardInsights() {
   const range = dashboardFilterRange();
   els.dashboardFilterSummary.textContent = range.label;
   els.dashboardCharts.innerHTML = UNITS.map((unit) => {
-    const counts = data[unit].reduce((total, item) => {
+    const counts = latestItemsForUnit(unit).reduce((total, item) => {
       total[itemDashboardBucket(item, unit)] += 1;
       return total;
     }, { complete: 0, waiting: 0, missing: 0 });
@@ -735,7 +837,7 @@ function renderMonthlyReminder() {
     return;
   }
   const emergencyUnits = ["Emer cart Adult", "Emer cart PED", "CPR Box", "Emer medicine"];
-  const items = emergencyUnits.flatMap((unit) => data[unit].map((item) => ({ ...item, unit })));
+  const items = emergencyUnits.flatMap((unit) => latestItemsForUnit(unit));
   const expiring = items.filter((item) => ["expiring", "expired"].includes(getItemStatus(item, item.unit).key));
   els.monthlyReminder.hidden = false;
   els.monthlyReminder.innerHTML = `<div class="monthly-reminder-card">
@@ -755,9 +857,9 @@ function renderAlerts() {
   }
 
   alerts.forEach((item) => {
-    const status = getItemStatus(item);
+    const status = getItemStatus(item, item.unit);
     const row = document.createElement("div");
-    row.className = `alert-item ${status.key === "expired" ? "expired" : ""} ${status.key === "short" ? "short" : ""}`;
+    row.className = `alert-item ${statusToneClass(status.key)}`;
     row.innerHTML = `<strong>${item.name}</strong><span>${item.unit} · ${alertText(item)}</span>`;
     els.alertList.append(row);
   });
@@ -789,7 +891,7 @@ function renderCheckLog() {
 
 function addCheckLog(unit, inspector, checkedAt, inspectionDate, shift) {
   const items = data[unit].map((item) => ({ ...item, unit }));
-  const shortCount = items.filter((item) => Number(item.countedQty) < Number(item.requiredQty)).length;
+  const shortCount = items.filter((item) => getItemStatus(item, unit).group === "short").length;
   const expiringCount = items.filter((item) => getItemStatus(item, unit).key === "expiring").length;
   const expiredCount = items.filter((item) => getItemStatus(item, unit).key === "expired").length;
 
@@ -824,26 +926,26 @@ function addCheckLog(unit, inspector, checkedAt, inspectionDate, shift) {
 }
 
 function getAlerts() {
-  return getAllItems().filter((item) => getItemStatus(item).key !== "ok");
+  return latestAllItems().filter((item) => getItemStatus(item, item.unit).key !== "ok");
 }
 
 function alertText(item) {
-  const status = getItemStatus(item);
+  const status = getItemStatus(item, item.unit);
   if (isEquipmentTemperatureItem(item)) {
-    if (status.key === "short") return "ส่งซ่อม";
+    if (status.group === "short") return "ส่งซ่อม";
     return `พร้อมใช้ · อุณหภูมิ ${formatTemperature(getTemperatureValue(item)) || "0.00"} °C`;
   }
   if (status.key === "unknown") return "ยังไม่ระบุจำนวนที่ต้องมีใน catalog";
-  if (status.key === "short") return `มี ${item.countedQty}/${item.requiredQty}${shortageReason(item) ? " · " + shortageReason(item) : ""}`;
+  if (status.group === "short") return `มี ${item.countedQty}/${item.requiredQty}${shortageReason(item, item.unit) ? " · " + shortageReason(item, item.unit) : ""}`;
   if (status.key === "expired") return `หมดอายุ ${formatDate(item.expiryDate)}`;
   return `เหลือ ${daysUntil(item.expiryDate)} วัน`;
 }
 
 function renderStockList() {
   const items = sortItems(
-    data[activeUnit].filter((item) => {
+    latestItemsForUnit(activeUnit).filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm);
-      const matchesStatus = statusFilter === "all" || getItemStatus(item).key === statusFilter;
+      const matchesStatus = statusMatchesFilter(item, activeUnit);
       return matchesSearch && matchesStatus;
     })
   );
@@ -886,13 +988,15 @@ function renderStockList() {
 
   const body = tableWrap.querySelector("tbody");
   items.forEach((item) => {
-    const status = getItemStatus(item);
+    const editableItem = data[activeUnit].find(entry => entry.id === item.id) || item;
+    const status = getItemStatus(item, activeUnit);
     const row = document.createElement("tr");
+    row.className = statusToneClass(status.key);
     row.innerHTML = `
       <td>
         <strong>${escapeHtml(item.name)}</strong>
         <span>${escapeHtml(activeUnit)}</span>
-        ${Number(item.countedQty) < Number(item.requiredQty) ? `<label class="shortage-label">หมายเหตุ<select class="shortage-select" aria-label="หมายเหตุ ${escapeHtml(item.name)}"><option value="">เลือกหมายเหตุ</option>${shortageReasons(activeUnit).map(reason => `<option${shortageReason(item) === reason ? " selected" : ""}>${reason}</option>`).join("")}</select></label>` : ""}
+        ${Number(item.countedQty) < Number(item.requiredQty) ? `<label class="shortage-label">หมายเหตุ<select class="shortage-select" aria-label="หมายเหตุ ${escapeHtml(item.name)}"><option value="">เลือกหมายเหตุ</option>${shortageReasons(activeUnit).map(reason => `<option${shortageReason(item, activeUnit) === reason ? " selected" : ""}>${reason}</option>`).join("")}</select></label>` : ""}
       </td>
       <td class="number-cell">${isEquipmentTemperatureItem(item) ? escapeHtml(getTemperatureRangeText(item)) : item.requiredQty == null ? "ยังไม่ระบุ" : escapeHtml(item.requiredQty)}</td>
       <td>
@@ -907,12 +1011,12 @@ function renderStockList() {
       <td>${isEquipmentTemperatureItem(item)
         ? `<div class="temperature-check">
             <select class="temperature-status" aria-label="สถานะ ${escapeHtml(item.name)}">
-              <option${item.equipmentStatus === "พร้อมใช้" ? " selected" : ""}>พร้อมใช้</option>
-              <option${item.equipmentStatus === "ส่งซ่อม" ? " selected" : ""}>ส่งซ่อม</option>
+              <option${editableItem.equipmentStatus === "พร้อมใช้" ? " selected" : ""}>พร้อมใช้</option>
+              <option${editableItem.equipmentStatus === "ส่งซ่อม" ? " selected" : ""}>ส่งซ่อม</option>
             </select>
             <label class="temperature-input-wrap">
               <span>อุณหภูมิ °C</span>
-              <input class="temperature-input" type="number" min="0" max="5" step="0.01" value="${escapeHtml(formatTemperature(getTemperatureValue(item)) || "")}" ${item.equipmentStatus === "ส่งซ่อม" ? "disabled" : ""} />
+              <input class="temperature-input" type="number" min="0" max="5" step="0.01" value="${escapeHtml(formatTemperature(getTemperatureValue(editableItem)) || "")}" ${editableItem.equipmentStatus === "ส่งซ่อม" ? "disabled" : ""} />
             </label>
           </div>`
         : (item.expiryDate ? escapeHtml(formatDate(item.expiryDate)) : '<span class="muted-cell">ไม่มีวันหมดอายุ</span>')}</td>
@@ -924,18 +1028,20 @@ function renderStockList() {
     const input = row.querySelector(".qty-input");
     if (input) {
       input.value = item.countedQty;
-      input.addEventListener("change", () => updateQty(item.id, Number(input.value)));
-      row.querySelector(".decrease").addEventListener("click", () => updateQty(item.id, Math.max(0, Number(item.countedQty) - 1)));
-      row.querySelector(".increase").addEventListener("click", () => updateQty(item.id, Number(item.countedQty) + 1));
+      input.addEventListener("change", () => updateQty(editableItem.id, Number(input.value)));
+      row.querySelector(".decrease").addEventListener("click", () => updateQty(editableItem.id, Math.max(0, Number(editableItem.countedQty) - 1)));
+      row.querySelector(".increase").addEventListener("click", () => updateQty(editableItem.id, Number(editableItem.countedQty) + 1));
     }
-    row.querySelector(".edit-button").addEventListener("click", () => openItemDialog(item));
+    row.querySelector(".edit-button").addEventListener("click", () => openItemDialog(editableItem));
     row.querySelector(".shortage-select")?.addEventListener("change", event => {
-      item.shortageReason = event.target.value;
+      editableItem.shortageReason = event.target.value;
+      syncLatestLogItem(activeUnit, editableItem);
       saveData();
+      saveCheckLogs();
       render();
     });
-    row.querySelector(".temperature-status")?.addEventListener("change", event => updateTemperatureStatus(item.id, event.target.value));
-    row.querySelector(".temperature-input")?.addEventListener("change", event => updateTemperature(item.id, event.target.value));
+    row.querySelector(".temperature-status")?.addEventListener("change", event => updateTemperatureStatus(editableItem.id, event.target.value));
+    row.querySelector(".temperature-input")?.addEventListener("change", event => updateTemperature(editableItem.id, event.target.value));
 
     body.append(row);
   });
@@ -949,8 +1055,26 @@ function statusBadgeClass(statusKey) {
     expiring: "status-pill warning",
     expired: "status-pill danger",
     short: "status-pill danger",
+    waiting: "status-pill waiting",
+    missing: "status-pill missing",
+    borrowed: "status-pill borrowed",
+    repair: "status-pill repair",
   };
   return classMap[statusKey] || "status-pill";
+}
+
+function statusToneClass(statusKey) {
+  const classMap = {
+    expiring: "status-expiring",
+    expired: "status-expired",
+    short: "status-short",
+    waiting: "status-waiting",
+    missing: "status-missing",
+    borrowed: "status-borrowed",
+    repair: "status-repair",
+    unknown: "status-unknown",
+  };
+  return classMap[statusKey] || "";
 }
 
 function sortItems(items) {
@@ -981,8 +1105,30 @@ function updateQty(id, nextQty) {
   if (!item) return;
   item.countedQty = Math.max(0, Number(nextQty) || 0);
   if (item.countedQty >= Number(item.requiredQty)) item.shortageReason = "";
+  syncLatestLogItem(activeUnit, item);
   saveData();
+  saveCheckLogs();
   render();
+}
+
+function syncLatestLogItem(unit, item) {
+  const latestLog = latestUnitLog(unit);
+  if (!latestLog?.items?.length) return;
+  const latestItem = latestLog.items.find(entry => normalizeName(entry.name) === normalizeName(item.name));
+  if (!latestItem) return;
+  latestItem.requiredQty = item.requiredQty;
+  latestItem.countedQty = item.countedQty;
+  latestItem.expiryDate = item.expiryDate || null;
+  latestItem.shortageReason = shortageReason(item, unit);
+  latestItem.status = getItemStatus(item, unit).label;
+  if (isEquipmentTemperatureItem(item)) {
+    latestItem.temperature = getTemperatureValue(item);
+    latestItem.temperatureRange = item.temperatureRange || latestItem.temperatureRange || { min: 0, max: 5, unit: "องศาเซลเซียส" };
+    latestItem.equipmentStatus = item.equipmentStatus || "พร้อมใช้";
+  }
+  latestLog.shortCount = latestLog.items.filter(entry => getItemStatus({ ...entry, unit }, unit).group === "short").length;
+  latestLog.expiringCount = latestLog.items.filter(entry => getItemStatus({ ...entry, unit }, unit).key === "expiring").length;
+  latestLog.expiredCount = latestLog.items.filter(entry => getItemStatus({ ...entry, unit }, unit).key === "expired").length;
 }
 
 function updateTemperatureStatus(id, nextStatus) {
@@ -1289,7 +1435,8 @@ async function saveCloudState() {
 
   const payload = {
     action: "saveState",
-    catalogVersion: CATALOG_VERSION,
+      catalogVersion: CATALOG_VERSION,
+      requiredBaselineVersion: localStorage.getItem(REQUIRED_BASELINE_KEY) || "",
     source: "med-stock",
     updatedAt: new Date().toISOString(),
     data,
@@ -1339,6 +1486,7 @@ async function clearSavedState() {
   localStorage.removeItem(INSPECTORS_KEY);
   localStorage.removeItem("med-stock-source-version");
   localStorage.removeItem(CATALOG_VERSION_KEY);
+  localStorage.removeItem(REQUIRED_BASELINE_KEY);
   data = cloneData(defaultData);
   checkLogs = [];
   activeView = "home";
@@ -1364,11 +1512,11 @@ async function loadCloudState() {
     const response = await jsonpRequest(settings.googleSheetUrl, { action: "loadState" });
     if (!response?.ok || !response.state?.data) return;
 
-    const nextData = ensureCatalogItems(normalizeImportedData(response.state.data));
+    const nextData = ensureCatalogItems(normalizeImportedData(response.state.data, { preserveRequiredQty: response.state.requiredBaselineVersion === CATALOG_VERSION || localStorage.getItem(REQUIRED_BASELINE_KEY) === CATALOG_VERSION }));
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
     cloudSyncPaused = true;
-    data = nextData;
     checkLogs = nextCheckLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
+    data = applyLatestCheckStateToData(nextData);
     renderInspectors();
     cloudSyncPaused = false;
     render();
@@ -1412,7 +1560,8 @@ function jsonpRequest(url, params = {}) {
   });
 }
 
-function normalizeImportedData(importedData) {
+function normalizeImportedData(importedData, options = {}) {
+  const preserveRequiredQty = Boolean(options.preserveRequiredQty);
   const normalized = {};
   UNITS.forEach((unit) => {
     const keys = [unit, ...Object.keys(UNIT_ALIASES).filter(key => UNIT_ALIASES[key] === unit)];
@@ -1436,8 +1585,8 @@ function normalizeImportedData(importedData) {
           id: item.id || seed.id,
           sourceId: seed.sourceId,
           name: seed.name,
-          requiredQty: seed.requiredQty,
-          countedQty: seed.countedQty,
+          requiredQty: preserveRequiredQty && Number.isFinite(Number(item.requiredQty)) ? Number(item.requiredQty) : seed.requiredQty,
+          countedQty: Number.isFinite(Number(item.countedQty)) ? Number(item.countedQty) : seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
           temperatureRange: seed.temperatureRange || item.temperatureRange || null,
         };
@@ -1683,7 +1832,7 @@ function escapeHtml(value) {
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify({ data, catalogVersion: CATALOG_VERSION, checkLogs, inspectors: inspectorNames(), settings: { expiryWindow: settings.expiryWindow } }, null, 2)], {
+  const blob = new Blob([JSON.stringify({ data, catalogVersion: CATALOG_VERSION, requiredBaselineVersion: localStorage.getItem(REQUIRED_BASELINE_KEY) || "", checkLogs, inspectors: inspectorNames(), settings: { expiryWindow: settings.expiryWindow } }, null, 2)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(blob);
@@ -1702,12 +1851,13 @@ function importData(event) {
   reader.onload = () => {
     try {
       const parsed = JSON.parse(String(reader.result));
-      const importedData = normalizeImportedData(parsed.data || parsed);
+      const importedData = normalizeImportedData(parsed.data || parsed, { preserveRequiredQty: parsed.requiredBaselineVersion === CATALOG_VERSION || localStorage.getItem(REQUIRED_BASELINE_KEY) === CATALOG_VERSION });
       data = importedData;
       if (Array.isArray(parsed.checkLogs)) {
         checkLogs = parsed.checkLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
         saveCheckLogs();
       }
+      data = applyLatestCheckStateToData(data);
       saveData();
       render();
       renderInspectors();
