@@ -715,7 +715,8 @@ function temperatureHistory() {
         value: Number(item.temperature),
       })))
     .filter((point) => point.date && Number.isFinite(point.value))
-    .sort((a, b) => String(a.date || a.checkedAt).localeCompare(String(b.date || b.checkedAt)));
+    .sort((a, b) => String(a.checkedAt || a.date).localeCompare(String(b.checkedAt || b.date)))
+    .map((point, index) => ({ ...point, index }));
 
   if (points.length) return points;
 
@@ -736,24 +737,22 @@ function renderTemperatureChart() {
   }
 
   const width = 640;
-  const height = 220;
-  const pad = { top: 18, right: 26, bottom: 34, left: 42 };
+  const height = 170;
+  const pad = { top: 14, right: 24, bottom: 30, left: 42 };
   const baselineMin = 0;
   const baselineMax = 5;
   const values = points.map(point => point.value);
   const minTemp = Math.min(baselineMin, ...values);
   const maxTemp = Math.max(baselineMax, ...values);
-  const dates = [...new Set(points.map(point => point.date))];
-  const dateIndex = new Map(dates.map((date, index) => [date, index]));
-  const xStep = dates.length > 1 ? (width - pad.left - pad.right) / (dates.length - 1) : 0;
-  const x = (date) => dates.length > 1 ? pad.left + (dateIndex.get(date) || 0) * xStep : width / 2;
+  const xStep = points.length > 1 ? (width - pad.left - pad.right) / (points.length - 1) : 0;
+  const x = (point) => points.length > 1 ? pad.left + point.index * xStep : width / 2;
   const y = (value) => pad.top + ((maxTemp - value) / (maxTemp - minTemp || 1)) * (height - pad.top - pad.bottom);
   const latest = points.at(-1);
   const average = points.reduce((sum, point) => sum + point.value, 0) / points.length;
   const outOfRange = points.filter((point) => point.value < baselineMin || point.value > baselineMax).length;
-  const labels = dates.map((date, index) => {
-    if (dates.length > 6 && index % Math.ceil(dates.length / 5) !== 0 && index !== dates.length - 1) return "";
-    return `<text x="${x(date).toFixed(2)}" y="${height - 10}" text-anchor="middle">${escapeHtml(formatShortDate(date))}</text>`;
+  const labels = points.map((point, index) => {
+    if (points.length > 6 && index % Math.ceil(points.length / 5) !== 0 && index !== points.length - 1) return "";
+    return `<text x="${x(point).toFixed(2)}" y="${height - 9}" text-anchor="middle">${escapeHtml(formatShortDate(point.date))}</text>`;
   }).join("");
   const series = TEMPERATURE_SHIFT_SERIES
     .map(seriesMeta => ({ ...seriesMeta, points: points.filter(point => point.shift === seriesMeta.key) }))
@@ -761,10 +760,10 @@ function renderTemperatureChart() {
   const fallbackPoints = points.filter(point => !TEMPERATURE_SHIFT_SERIES.some(seriesMeta => seriesMeta.key === point.shift));
   if (fallbackPoints.length) series.push({ key: "other", label: "อื่น ๆ", color: "#4f9c4e", points: fallbackPoints });
   const lines = series.map(seriesMeta => {
-    const path = seriesMeta.points.map((point, index) => `${index ? "L" : "M"} ${x(point.date).toFixed(2)} ${y(point.value).toFixed(2)}`).join(" ");
+    const path = seriesMeta.points.map((point, index) => `${index ? "L" : "M"} ${x(point).toFixed(2)} ${y(point.value).toFixed(2)}`).join(" ");
     return `<path class="temp-line" d="${path}" style="stroke:${seriesMeta.color}"></path>`;
   }).join("");
-  const dots = series.flatMap(seriesMeta => seriesMeta.points.map(point => `<circle cx="${x(point.date).toFixed(2)}" cy="${y(point.value).toFixed(2)}" r="4" style="fill:${seriesMeta.color}"><title>${escapeHtml(seriesMeta.label)} ${escapeHtml(formatDate(point.date))}: ${formatTemperature(point.value)} °C</title></circle>`)).join("");
+  const dots = series.flatMap(seriesMeta => seriesMeta.points.map(point => `<circle cx="${x(point).toFixed(2)}" cy="${y(point.value).toFixed(2)}" r="3.5" style="fill:${seriesMeta.color}"><title>${escapeHtml(seriesMeta.label)} ${escapeHtml(formatDate(point.date))}: ${formatTemperature(point.value)} °C</title></circle>`)).join("");
   const legend = `${series.map(seriesMeta => `<span><i style="background:${seriesMeta.color}"></i>${escapeHtml(seriesMeta.label)}</span>`).join("")}<span><i class="baseline-key"></i>Baseline 0-5 °C</span>`;
 
   els.temperatureChart.innerHTML = `

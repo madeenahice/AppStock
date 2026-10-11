@@ -1,5 +1,5 @@
 {
-  "version": "manual-catalog-20261011-6",
+  "version": "manual-catalog-20261011-7",
   "units": {
     "Med Stock": [
       {
@@ -608,15 +608,6 @@
         "requiredQty": 1,
         "countedQty": 1,
         "expiryDate": "2029-03-12",
-        "inspector": "",
-        "checkedAt": ""
-      },
-      {
-        "sourceId": "rn-source-2-15",
-        "name": "Dopamine injection 200 mg 10 ml *เฉพาะหน่วยไตเทียม",
-        "requiredQty": 0,
-        "countedQty": 0,
-        "expiryDate": null,
         "inspector": "",
         "checkedAt": ""
       },

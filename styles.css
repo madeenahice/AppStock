@@ -236,8 +236,7 @@ h1 {
 }
 
 .dashboard-insights {
-  display: grid;
-  grid-template-rows: auto auto auto auto auto auto auto;
+  display: block;
   min-height: 0;
   margin-top: 10px;
   overflow: auto;
@@ -295,8 +294,8 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 12px;
   min-height: 0;
-  padding: 12px 14px 16px;
-  overflow: visible;
+  padding: 12px 14px 22px;
+  overflow: hidden;
 }
 
 .pie-card {
@@ -381,8 +380,8 @@ h1 {
 
 .temperature-chart-panel {
   display: grid;
-  gap: 10px;
-  margin: 0 14px 16px;
+  gap: 8px;
+  margin: 22px 14px 16px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -444,9 +443,9 @@ h1 {
 
 .temperature-chart {
   width: 100%;
-  aspect-ratio: 4 / 1;
-  max-height: 240px;
-  min-height: 160px;
+  aspect-ratio: 5.8 / 1;
+  max-height: 150px;
+  min-height: 118px;
   display: block;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1741,7 +1740,7 @@ h1 {
   }
 
   .temperature-chart-panel {
-    margin: 0 10px 14px;
+    margin: 18px 10px 14px;
     padding: 10px;
   }
 
