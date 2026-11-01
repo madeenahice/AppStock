@@ -497,6 +497,72 @@ h1 {
   padding: 0 14px 14px;
 }
 
+.check-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 8px;
+  padding: 0 14px 16px;
+}
+
+.check-type-card {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.check-type-card > span {
+  display: grid;
+  place-items: center;
+  color: var(--brand-dark);
+}
+
+.check-type-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+.check-type-card b {
+  color: var(--brand-dark);
+  font-size: 1.1rem;
+}
+
+.check-type-card small {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.inspector-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.icon-button.compact {
+  width: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .heatmap-cell {
   display: grid;
   gap: 4px;
@@ -1639,7 +1705,7 @@ h1 {
   }
 
   .pie-grid {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .temperature-chart-summary {
@@ -1761,6 +1827,16 @@ h1 {
   .inspector-heatmap {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 0 10px 10px;
+  }
+
+  .check-type-grid {
+    grid-template-columns: 1fr;
+    padding: 0 10px 12px;
+  }
+
+  .inspector-pagination {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .summary-panel {

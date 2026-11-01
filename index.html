@@ -106,8 +106,17 @@
         </div>
         <div class="temperature-chart-panel" id="temperatureChart"></div>
         <div class="section-heading">
+          <h2>สรุปการเช็คแยกตามหัวข้อ</h2>
+          <p>นับตามช่วงเวลาที่เลือก</p>
+        </div>
+        <div class="check-type-grid" id="checkTypeSummary"></div>
+        <div class="section-heading">
           <h2>ผู้ตรวจเช็คบ่อย</h2>
-          <p>นับจากประวัติการตรวจ</p>
+          <div class="inspector-pagination" aria-label="เปลี่ยนหน้ารายชื่อผู้ตรวจ">
+            <span id="inspectorPageSummary">0 คน</span>
+            <button class="icon-button compact" id="inspectorPreviousButton" type="button" title="รายชื่อก่อนหน้า" aria-label="รายชื่อก่อนหน้า">‹</button>
+            <button class="icon-button compact" id="inspectorNextButton" type="button" title="รายชื่อถัดไป" aria-label="รายชื่อถัดไป">›</button>
+          </div>
         </div>
         <div class="inspector-heatmap" id="inspectorHeatmap"></div>
       </section>
@@ -289,6 +298,6 @@
     </template>
 
     <script src="./seed-data.js?v=20261101-1"></script>
-    <script src="./app.js?v=20261101-2"></script>
+    <script src="./app.js?v=20261101-4"></script>
   </body>
 </html>

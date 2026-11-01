@@ -58,6 +58,8 @@ let sortMode = "default";
 let statusFilter = "all";
 let dashboardFilterMode = "month";
 let dashboardFilterMonth = localDate().slice(0, 7);
+let inspectorPage = 0;
+const INSPECTORS_PER_PAGE = 5;
 let cloudSyncPaused = false;
 let cloudSaveTimer = null;
 
@@ -88,7 +90,11 @@ const els = {
   dashboardFilterSummary: document.querySelector("#dashboardFilterSummary"),
   dashboardCharts: document.querySelector("#dashboardCharts"),
   temperatureChart: document.querySelector("#temperatureChart"),
+  checkTypeSummary: document.querySelector("#checkTypeSummary"),
   inspectorHeatmap: document.querySelector("#inspectorHeatmap"),
+  inspectorPageSummary: document.querySelector("#inspectorPageSummary"),
+  inspectorPreviousButton: document.querySelector("#inspectorPreviousButton"),
+  inspectorNextButton: document.querySelector("#inspectorNextButton"),
   searchInput: document.querySelector("#searchInput"),
   sortSelect: document.querySelector("#sortSelect"),
   statusFilter: document.querySelector("#statusFilter"),
@@ -369,12 +375,23 @@ function bindEvents() {
   els.clearSavedStateButton.addEventListener("click", clearSavedState);
   els.dashboardFilterMode.addEventListener("change", () => {
     dashboardFilterMode = els.dashboardFilterMode.value;
+    inspectorPage = 0;
     renderDashboard();
   });
   els.dashboardFilterMonth.addEventListener("change", () => {
     dashboardFilterMonth = els.dashboardFilterMonth.value || localDate().slice(0, 7);
     els.dashboardFilterMonth.value = dashboardFilterMonth;
+    inspectorPage = 0;
     renderDashboard();
+  });
+  els.inspectorPreviousButton.addEventListener("click", () => {
+    inspectorPage = Math.max(0, inspectorPage - 1);
+    renderDashboardInsights();
+  });
+  els.inspectorNextButton.addEventListener("click", () => {
+    const pageCount = Math.ceil(rankedInspectors().length / INSPECTORS_PER_PAGE);
+    inspectorPage = Math.min(Math.max(0, pageCount - 1), inspectorPage + 1);
+    renderDashboardInsights();
   });
 }
 
@@ -814,17 +831,54 @@ function renderDashboardInsights() {
 
   renderTemperatureChart();
 
+  renderCheckTypeSummary();
+  renderInspectorRanking();
+}
+
+function checkTypeCounts() {
+  const counts = new Map(UNITS.map(unit => [unit, 0]));
+  dashboardLogs().forEach((log) => {
+    const unit = UNIT_ALIASES[log.unit] || log.unit;
+    if (counts.has(unit)) counts.set(unit, counts.get(unit) + 1);
+  });
+  return UNITS.map(unit => [unit, counts.get(unit) || 0]);
+}
+
+function renderCheckTypeSummary() {
+  const rows = checkTypeCounts();
+  els.checkTypeSummary.innerHTML = rows.map(([unit, count]) => `
+    <article class="check-type-card">
+      <span>${unitIcon(unit)}</span>
+      <strong>${escapeHtml(unit)}</strong>
+      <b>${count}</b>
+      <small>ครั้งที่เช็ค</small>
+    </article>
+  `).join("");
+}
+
+function rankedInspectors() {
   const counts = new Map();
   dashboardLogs().forEach((log) => {
     const name = String(log.inspector || "").trim();
     if (name) counts.set(name, (counts.get(name) || 0) + 1);
   });
-  const rows = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "th")).slice(0, 18);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "th"));
+}
+
+function renderInspectorRanking() {
+  const rows = rankedInspectors();
+  const pageCount = Math.max(1, Math.ceil(rows.length / INSPECTORS_PER_PAGE));
+  inspectorPage = Math.min(inspectorPage, pageCount - 1);
+  const pageRows = rows.slice(inspectorPage * INSPECTORS_PER_PAGE, (inspectorPage + 1) * INSPECTORS_PER_PAGE);
   const max = Math.max(1, ...rows.map((row) => row[1]));
-  els.inspectorHeatmap.innerHTML = rows.length
-    ? rows.map(([name, count]) => {
+  els.inspectorPageSummary.textContent = rows.length ? `${inspectorPage * INSPECTORS_PER_PAGE + 1}-${inspectorPage * INSPECTORS_PER_PAGE + pageRows.length} จาก ${rows.length} คน` : "0 คน";
+  els.inspectorPreviousButton.disabled = inspectorPage === 0;
+  els.inspectorNextButton.disabled = inspectorPage >= pageCount - 1;
+  els.inspectorHeatmap.innerHTML = pageRows.length
+    ? pageRows.map(([name, count], index) => {
       const level = Math.max(1, Math.ceil((count / max) * 5));
-      return `<article class="heatmap-cell heat-${level}"><strong>${escapeHtml(name)}</strong><span>${count} ครั้ง</span></article>`;
+      const rank = inspectorPage * INSPECTORS_PER_PAGE + index + 1;
+      return `<article class="heatmap-cell heat-${level}"><small>อันดับ ${rank}</small><strong>${escapeHtml(name)}</strong><span>${count} ครั้ง</span></article>`;
     }).join("")
     : '<div class="empty-state">ยังไม่มีประวัติผู้ตรวจเช็ค</div>';
 }
@@ -1209,7 +1263,7 @@ async function saveInspection() {
   saveData();
   renderInspectors(inspector);
   els.inspectionInspector.value = "";
-  render();
+  goHome();
   showToast("บันทึกในเครื่องสำเร็จ กำลังส่ง Google Sheet");
   els.saveInspectionButton.disabled = true;
   try {
@@ -1289,7 +1343,9 @@ function saveItem(event) {
   if (index >= 0) data[activeUnit][index] = nextItem;
   else data[activeUnit].push(nextItem);
 
+  syncLatestLogItem(activeUnit, nextItem);
   saveData();
+  saveCheckLogs();
   els.itemDialog.close();
   render();
   showToast(SUCCESS_TOAST_MESSAGE);
