@@ -8,6 +8,17 @@ const INSPECTORS_KEY = "med-stock-inspectors-v1";
 const SHORTAGE_REASONS = ["รอเบิก", "ตามไม่ได้"];
 const EQUIPMENT_SHORTAGE_REASONS = ["ถูกยืม", "ส่งซ่อม"];
 const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่าย"];
+const PED_LAYOUT_VERSION_KEY = "med-stock-ped-layout-version";
+const PED_LAYOUT_VERSION = "20261101-5";
+const PED_CART_LAYOUT = [
+  ["ด้านบน", "Laryngoscope handle", 1, ["Laryngoscope handle ในกล่อง"]],
+  ["ด้านบน", "blade (Ped) no.00 ตรง ในกล่อง", 1], ["ด้านบน", "blade (Ped) no.0 ตรง ในกล่อง", 1], ["ด้านบน", "blade (Ped) no.1 ตรง ในกล่อง", 1], ["ด้านบน", "blade (Ped) 2 โค้ง ในกล่อง", 1], ["ด้านบน", "Stethoscope", 1], ["ด้านบน", "Suction no.6", 2], ["ด้านบน", "Suction no.8", 2], ["ด้านบน", "Suction no.10", 2],
+  ["รถ Emer ชั้น 1", "กรรไกร", 1], ["รถ Emer ชั้น 1", "Bladeตรง no.0 ชั้น 1", 1], ["รถ Emer ชั้น 1", "Bladeตรง no.1 ชั้น 1", 1], ["รถ Emer ชั้น 1", "face mask no.0 ชั้น 1", 1], ["รถ Emer ชั้น 1", "face mask no.1 ชั้น 1", 1], ["รถ Emer ชั้น 1", "Sterlile syring ball no.0", 1], ["รถ Emer ชั้น 1", "Sterlile syring ball no.1", 1], ["รถ Emer ชั้น 1", "ปรอทวัดทางทวาร", 2], ["รถ Emer ชั้น 1", "Cord clamp", 5], ["รถ Emer ชั้น 1", "สายวัดความยาว", 1], ["รถ Emer ชั้น 1", "lung test", 1], ["รถ Emer ชั้น 1", "EtCo2 pediatric", 1], ["รถ Emer ชั้น 1", "OG tube no 6", 2], ["รถ Emer ชั้น 1", "OG tube no 8", 2], ["รถ Emer ชั้น 1", "Red dot", 4], ["รถ Emer ชั้น 1", "หมวกเด็ก", 1],
+  ["รถ Emer ชั้น 2", "Magill forceps (Ped)", 1], ["รถ Emer ชั้น 2", "Oropharyngeal airway ขาว", 1], ["รถ Emer ชั้น 2", "ET-tube No.2.5 uncuffed", 2], ["รถ Emer ชั้น 2", "ET-tube No.3.0 uncuffed", 2], ["รถ Emer ชั้น 2", "ET-tube No.3.0 with cuff", 2], ["รถ Emer ชั้น 2", "ET-tube No.3.5 with cuff", 2], ["รถ Emer ชั้น 2", "ET-tube 4.0 with cuff", 2], ["รถ Emer ชั้น 2", "ET-tube 4.5 with cuff", 2], ["รถ Emer ชั้น 2", "ET-tube 5.0 with cuff", 2], ["รถ Emer ชั้น 2", "ET-tube 5.5 with cuff", 2], ["รถ Emer ชั้น 2", "Sterile Stylet no.6", 2], ["รถ Emer ชั้น 2", "Sterile Stylet no.10", 2], ["รถ Emer ชั้น 2", "Strap tube/ Sterile gel /syring 3 ml", 3],
+  ["รถ Emer ชั้น 3", "Face mask no.0", 6], ["รถ Emer ชั้น 3", "Face mask no.1", 7], ["รถ Emer ชั้น 3", "Face mask no.2", 4],
+  ["รถ Emer ชั้น 4", "O2 mask with bag (Ped)", 1], ["รถ Emer ชั้น 4", "Ambu-bag (Neonatal)", 1], ["รถ Emer ชั้น 4", "Ambu-bag (Ped)", 1], ["รถ Emer ชั้น 4", "Sterile gloves No. 6", 2], ["รถ Emer ชั้น 4", "Sterile gloves No. 6.5", 2], ["รถ Emer ชั้น 4", "Sterile gloves No. 7", 2], ["รถ Emer ชั้น 4", "Sterile gloves No. 7.5", 2], ["รถ Emer ชั้น 4", "CPE Gown", 2], ["รถ Emer ชั้น 4", "Glasses", 1], ["รถ Emer ชั้น 4", "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)", 0], ["รถ Emer ชั้น 4", "CPR Board", 1],
+  ["Radiant warmer", "Oxygen tube", 2, ["Oxygen tube (ชั้น 1 Radiant warmmer)"]], ["Radiant warmer", "3-piece", 2, ["3-piece (ชั้น 1 Radiant warmmer)"]], ["Radiant warmer", "Tegaderm 4*4", 3, ["Tegaderm 4*4 (ชั้น 1 Radiant warmmer)"]], ["Radiant warmer", "Plastic wrap", 2, ["Plastic wrap (ชั้น 2 Radiant warmmer)"]], ["Radiant warmer", "Thermo trace central", 3, ["Thermo trace central (ชั้น 2 Radiant warmmer)"]], ["Radiant warmer", "Thermo trace peripheral", 3, ["Thermo trace peripheral (ชั้น 2 Radiant warmmer)"]],
+];
 const STORAGE_KEY = "cute-med-stock-v3";
 const CATALOG_VERSION_KEY = "med-stock-catalog-version";
 const CATALOG_VERSION = window.SEED_CATALOG_VERSION || "";
@@ -50,6 +61,7 @@ const defaultData = hydrateSeed(window.SEED_STOCK_DATA || sampleData);
 let data = loadData();
 let settings = loadSettings();
 let checkLogs = loadCheckLogs();
+if (upgradePedCartLayout(data)) localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 data = applyLatestCheckStateToData(data);
 let activeUnit = UNITS[0];
 let activeView = "home";
@@ -1384,6 +1396,44 @@ function recoverMissingItems() {
   els.statusFilter.value = "all";
   render();
   alert(recoveredCount ? `กู้รายการกลับมาแล้ว ${recoveredCount} รายการ` : "ไม่พบรายการที่หายไปจาก catalog ในระบบ");
+}
+
+function upgradePedCartLayout(target) {
+  if (localStorage.getItem(PED_LAYOUT_VERSION_KEY) === PED_LAYOUT_VERSION) return false;
+  const currentItems = Array.isArray(target["Emer cart PED"]) ? target["Emer cart PED"] : [];
+  const hasLegacyNames = currentItems.some(item => [
+    "Laryngoscope handle ในกล่อง",
+    "Oxygen tube (ชั้น 1 Radiant warmmer)",
+    "3-piece (ชั้น 1 Radiant warmmer)",
+    "Tegaderm 4*4 (ชั้น 1 Radiant warmmer)",
+  ].includes(item.name));
+  const hasUncategorizedLegacyList = currentItems.length >= 50 && currentItems.some(item => !item.location);
+  if (!hasLegacyNames && !hasUncategorizedLegacyList) {
+    localStorage.setItem(PED_LAYOUT_VERSION_KEY, PED_LAYOUT_VERSION);
+    return false;
+  }
+  const byName = new Map(currentItems.map(item => [normalizeName(item.name), item]));
+
+  target["Emer cart PED"] = PED_CART_LAYOUT.map(([location, name, requiredQty, aliases = []], index) => {
+    const existing = [name, ...aliases].map(alias => byName.get(normalizeName(alias))).find(Boolean);
+    return {
+      ...(existing || {}),
+      id: existing?.id || `ped-layout-${index + 1}`,
+      sourceId: existing?.sourceId || `ped-layout-${index + 1}`,
+      name,
+      location,
+      requiredQty,
+      countedQty: Number.isFinite(Number(existing?.countedQty)) ? Number(existing.countedQty) : requiredQty,
+      expiryDate: existing?.expiryDate || null,
+      inspector: existing?.inspector || "",
+      checkedAt: existing?.checkedAt || "",
+      inspectionDate: existing?.inspectionDate || "",
+      shift: existing?.shift || "",
+      shortageReason: existing?.shortageReason || "",
+    };
+  });
+  localStorage.setItem(PED_LAYOUT_VERSION_KEY, PED_LAYOUT_VERSION);
+  return true;
 }
 
 function normalizeName(name) {
