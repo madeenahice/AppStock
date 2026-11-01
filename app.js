@@ -571,6 +571,7 @@ function latestItemState(item, unit = item.unit || activeUnit) {
     sourceId: item.sourceId,
     id: item.id,
     name: item.name,
+    location: item.location || "",
     requiredQty: item.requiredQty,
     temperatureRange: item.temperatureRange || latestItem.temperatureRange || null,
   };
