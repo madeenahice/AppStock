@@ -74,6 +74,7 @@ let inspectorPage = 0;
 const INSPECTORS_PER_PAGE = 5;
 let cloudSyncPaused = false;
 let cloudSaveTimer = null;
+let stateRevision = 0;
 
 const els = {
   unitTabs: document.querySelector("#unitTabs"),
@@ -342,6 +343,7 @@ function loadCheckLogs() {
 }
 
 function saveData() {
+  stateRevision += 1;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
   localStorage.setItem(REQUIRED_BASELINE_KEY, CATALOG_VERSION);
@@ -353,6 +355,7 @@ function saveSettings() {
 }
 
 function saveCheckLogs() {
+  stateRevision += 1;
   localStorage.setItem(CHECK_LOG_KEY, JSON.stringify(checkLogs));
   queueCloudStateSave();
 }
@@ -1111,6 +1114,9 @@ function renderStockList({ preserveScroll = false } = {}) {
     const input = row.querySelector(".qty-input");
     if (input) {
       input.value = item.countedQty;
+      input.addEventListener("input", () => {
+        if (input.value !== "") rememberQty(editableItem.id, Number(input.value));
+      });
       input.addEventListener("change", () => updateQty(editableItem.id, Number(input.value)));
       row.querySelector(".decrease").addEventListener("click", () => updateQty(editableItem.id, Math.max(0, Number(editableItem.countedQty) - 1)));
       row.querySelector(".increase").addEventListener("click", () => updateQty(editableItem.id, Number(editableItem.countedQty) + 1));
@@ -1202,14 +1208,19 @@ function buildMeta(item) {
 }
 
 function updateQty(id, nextQty) {
+  if (!rememberQty(id, nextQty)) return;
+  render({ preserveStockScroll: true });
+}
+
+function rememberQty(id, nextQty) {
   const item = data[activeUnit].find((entry) => entry.id === id);
-  if (!item) return;
+  if (!item) return false;
   item.countedQty = Math.max(0, Number(nextQty) || 0);
   if (item.countedQty >= Number(item.requiredQty)) item.shortageReason = "";
   syncLatestLogItem(activeUnit, item);
   saveData();
   saveCheckLogs();
-  render({ preserveStockScroll: true });
+  return true;
 }
 
 function syncLatestLogItem(unit, item) {
@@ -1649,10 +1660,15 @@ async function clearSavedState() {
 
 async function loadCloudState() {
   if (!settings.googleSheetUrl) return;
+  const revisionAtRequest = stateRevision;
 
   try {
     const response = await jsonpRequest(settings.googleSheetUrl, { action: "loadState" });
     if (!response?.ok || !response.state?.data) return;
+    if (stateRevision !== revisionAtRequest) {
+      void saveCloudState();
+      return;
+    }
 
     const nextData = ensureCatalogItems(normalizeImportedData(response.state.data, { preserveRequiredQty: response.state.requiredBaselineVersion === CATALOG_VERSION || localStorage.getItem(REQUIRED_BASELINE_KEY) === CATALOG_VERSION }));
     const pedLayoutMigrated = upgradePedCartLayout(nextData, true);
