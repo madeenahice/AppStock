@@ -943,13 +943,13 @@ function alertText(item) {
 }
 
 function renderStockList() {
-  const items = sortItems(
-    latestItemsForUnit(activeUnit).filter((item) => {
+  const filteredItems = latestItemsForUnit(activeUnit).filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm);
       const matchesStatus = statusMatchesFilter(item, activeUnit);
       return matchesSearch && matchesStatus;
-    })
-  );
+    });
+  const itemGroups = groupItemsByLocation(filteredItems);
+  const items = itemGroups.flatMap(group => group.items);
   const latestItem = data[activeUnit]
     .filter((item) => item.checkedAt)
     .sort((a, b) => String(a.checkedAt).localeCompare(String(b.checkedAt)))
@@ -989,7 +989,15 @@ function renderStockList() {
   `;
 
   const body = tableWrap.querySelector("tbody");
-  items.forEach((item) => {
+  itemGroups.forEach((group) => {
+    if (group.location) {
+      const heading = document.createElement("tr");
+      heading.className = "stock-location-heading";
+      heading.innerHTML = `<th colspan="8">${escapeHtml(group.location)}</th>`;
+      body.append(heading);
+    }
+
+    group.items.forEach((item) => {
     const editableItem = data[activeUnit].find(entry => entry.id === item.id) || item;
     const status = getItemStatus(item, activeUnit);
     const row = document.createElement("tr");
@@ -1046,10 +1054,24 @@ function renderStockList() {
     row.querySelector(".temperature-status")?.addEventListener("change", event => updateTemperatureStatus(editableItem.id, event.target.value));
     row.querySelector(".temperature-input")?.addEventListener("change", event => updateTemperature(editableItem.id, event.target.value));
 
-    body.append(row);
+      body.append(row);
+    });
   });
 
   els.stockList.append(tableWrap);
+}
+
+function groupItemsByLocation(items) {
+  const groups = new Map();
+  items.forEach((item) => {
+    const location = item.location || "";
+    if (!groups.has(location)) groups.set(location, []);
+    groups.get(location).push(item);
+  });
+  return [...groups.entries()].map(([location, groupItems]) => ({
+    location,
+    items: sortItems(groupItems),
+  }));
 }
 
 function statusBadgeClass(statusKey) {

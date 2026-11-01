@@ -1156,6 +1156,16 @@ h1 {
   white-space: nowrap;
 }
 
+.stock-table .stock-location-heading th {
+  padding: 9px 12px;
+  color: var(--brand-dark);
+  background: var(--mint-soft);
+  border-top: 2px solid var(--line);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: left;
+}
+
 .stock-table td {
   color: var(--ink);
   font-size: 0.86rem;

@@ -1,5 +1,5 @@
 {
-  "version": "manual-catalog-20261101-ped-cart-2",
+  "version": "manual-catalog-20261101-ped-cart-4",
   "units": {
     "Med Stock": [
       {
@@ -1337,8 +1337,8 @@
         "sourceId": "rn-source-7-24",
         "name": "Magill forceps (Ped)",
         "location": "รถ Emer ชั้น 2",
-        "requiredQty": 2,
-        "countedQty": 2,
+        "requiredQty": 1,
+        "countedQty": 1,
         "expiryDate": null,
         "inspector": "",
         "checkedAt": ""
@@ -1347,8 +1347,8 @@
         "sourceId": "rn-source-7-25",
         "name": "Oropharyngeal airway ขาว",
         "location": "รถ Emer ชั้น 2",
-        "requiredQty": 2,
-        "countedQty": 2,
+        "requiredQty": 1,
+        "countedQty": 1,
         "expiryDate": "2027-01-03",
         "inspector": "",
         "checkedAt": ""
@@ -1587,8 +1587,8 @@
         "sourceId": "rn-source-7-52",
         "name": "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)",
         "location": "รถ Emer ชั้น 4",
-        "requiredQty": 1,
-        "countedQty": 1,
+        "requiredQty": 0,
+        "countedQty": 0,
         "expiryDate": null,
         "inspector": "",
         "checkedAt": ""
