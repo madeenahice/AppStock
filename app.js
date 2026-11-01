@@ -214,6 +214,7 @@ function hydrateSeed(seed) {
       id: item.sourceId || createId(),
       sourceId: item.sourceId || "",
       name: item.name,
+      location: item.location || "",
       requiredQty: item.requiredQty == null ? null : Number(item.requiredQty),
       countedQty: Number(item.countedQty) || 0,
       shortageReason: item.shortageReason || "",
@@ -279,7 +280,7 @@ function applyCatalog(previous) {
       const old = candidates.find(item => !used.has(item) && normalizeName(item.name) === normalizeName(seed.name));
       if (!old) return cloneData(seed);
       used.add(old);
-      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, requiredQty: Number.isFinite(Number(old.requiredQty)) ? Number(old.requiredQty) : seed.requiredQty, countedQty: Number.isFinite(Number(old.countedQty)) ? Number(old.countedQty) : seed.countedQty };
+      return { ...old, id: old.id || seed.id, sourceId: seed.sourceId, name: seed.name, location: seed.location || "", requiredQty: Number.isFinite(Number(old.requiredQty)) ? Number(old.requiredQty) : seed.requiredQty, countedQty: Number.isFinite(Number(old.countedQty)) ? Number(old.countedQty) : seed.countedQty };
     });
   });
   return result;
@@ -974,6 +975,7 @@ function renderStockList() {
       <thead>
         <tr>
           <th>รายการ</th>
+          <th>ตำแหน่ง</th>
           <th>จำนวนที่ต้องมี</th>
           <th>จำนวนที่นับได้</th>
           <th>วันหมดอายุ / อุณหภูมิ</th>
@@ -998,6 +1000,7 @@ function renderStockList() {
         <span>${escapeHtml(activeUnit)}</span>
         ${Number(item.countedQty) < Number(item.requiredQty) ? `<label class="shortage-label">หมายเหตุ<select class="shortage-select" aria-label="หมายเหตุ ${escapeHtml(item.name)}"><option value="">เลือกหมายเหตุ</option>${shortageReasons(activeUnit).map(reason => `<option${shortageReason(item, activeUnit) === reason ? " selected" : ""}>${reason}</option>`).join("")}</select></label>` : ""}
       </td>
+      <td>${item.location ? escapeHtml(item.location) : '<span class="muted-cell">-</span>'}</td>
       <td class="number-cell">${isEquipmentTemperatureItem(item) ? escapeHtml(getTemperatureRangeText(item)) : item.requiredQty == null ? "ยังไม่ระบุ" : escapeHtml(item.requiredQty)}</td>
       <td>
         ${isEquipmentTemperatureItem(item)
@@ -1585,6 +1588,7 @@ function normalizeImportedData(importedData, options = {}) {
           id: item.id || seed.id,
           sourceId: seed.sourceId,
           name: seed.name,
+          location: seed.location || "",
           requiredQty: preserveRequiredQty && Number.isFinite(Number(item.requiredQty)) ? Number(item.requiredQty) : seed.requiredQty,
           countedQty: Number.isFinite(Number(item.countedQty)) ? Number(item.countedQty) : seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
