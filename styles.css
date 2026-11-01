@@ -2037,26 +2037,30 @@ h1 {
   }
 
   .stock-table td:nth-child(2)::before {
-    content: "จำนวนที่ต้องมี";
+    content: "ตำแหน่ง";
   }
 
   .stock-table td:nth-child(3)::before {
-    content: "จำนวนที่นับได้";
+    content: "จำนวนที่ต้องมี";
   }
 
   .stock-table td:nth-child(4)::before {
-    content: "วันหมดอายุ";
+    content: "จำนวนที่นับได้";
   }
 
   .stock-table td:nth-child(5)::before {
-    content: "สถานะ";
+    content: "วันหมดอายุ / อุณหภูมิ";
   }
 
   .stock-table td:nth-child(6)::before {
-    content: "ตรวจล่าสุด";
+    content: "สถานะ";
   }
 
   .stock-table td:nth-child(7)::before {
+    content: "ตรวจล่าสุด";
+  }
+
+  .stock-table td:nth-child(8)::before {
     content: "จัดการ";
   }
 
@@ -2066,11 +2070,6 @@ h1 {
 
   .stock-table td:last-child {
     border-bottom: 0;
-  }
-
-  .stock-table td:nth-child(5),
-  .stock-table td:nth-child(6) {
-    display: none;
   }
 
   .stock-table .number-cell,
