@@ -1345,6 +1345,7 @@ function saveItem(event) {
   const nextItem = {
     id,
     name,
+    location: existingItem?.location || "",
     requiredQty: isTemperatureItem ? null : Number(els.requiredQty.value) || 0,
     countedQty: isTemperatureItem ? 0 : Number(els.countedQty.value) || 0,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
