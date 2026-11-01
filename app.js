@@ -9,7 +9,7 @@ const SHORTAGE_REASONS = ["รอเบิก", "ตามไม่ได้"];
 const EQUIPMENT_SHORTAGE_REASONS = ["ถูกยืม", "ส่งซ่อม"];
 const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่าย"];
 const PED_LAYOUT_VERSION_KEY = "med-stock-ped-layout-version";
-const PED_LAYOUT_VERSION = "20261101-5";
+const PED_LAYOUT_VERSION = "20261101-6";
 const PED_CART_LAYOUT = [
   ["ด้านบน", "Laryngoscope handle", 1, ["Laryngoscope handle ในกล่อง"]],
   ["ด้านบน", "blade (Ped) no.00 ตรง ในกล่อง", 1], ["ด้านบน", "blade (Ped) no.0 ตรง ในกล่อง", 1], ["ด้านบน", "blade (Ped) no.1 ตรง ในกล่อง", 1], ["ด้านบน", "blade (Ped) 2 โค้ง ในกล่อง", 1], ["ด้านบน", "Stethoscope", 1], ["ด้านบน", "Suction no.6", 2], ["ด้านบน", "Suction no.8", 2], ["ด้านบน", "Suction no.10", 2],
@@ -1398,8 +1398,8 @@ function recoverMissingItems() {
   alert(recoveredCount ? `กู้รายการกลับมาแล้ว ${recoveredCount} รายการ` : "ไม่พบรายการที่หายไปจาก catalog ในระบบ");
 }
 
-function upgradePedCartLayout(target) {
-  if (localStorage.getItem(PED_LAYOUT_VERSION_KEY) === PED_LAYOUT_VERSION) return false;
+function upgradePedCartLayout(target, force = false) {
+  if (!force && localStorage.getItem(PED_LAYOUT_VERSION_KEY) === PED_LAYOUT_VERSION) return false;
   const currentItems = Array.isArray(target["Emer cart PED"]) ? target["Emer cart PED"] : [];
   const hasLegacyNames = currentItems.some(item => [
     "Laryngoscope handle ในกล่อง",
@@ -1645,10 +1645,12 @@ async function loadCloudState() {
     if (!response?.ok || !response.state?.data) return;
 
     const nextData = ensureCatalogItems(normalizeImportedData(response.state.data, { preserveRequiredQty: response.state.requiredBaselineVersion === CATALOG_VERSION || localStorage.getItem(REQUIRED_BASELINE_KEY) === CATALOG_VERSION }));
+    const pedLayoutMigrated = upgradePedCartLayout(nextData, true);
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
     cloudSyncPaused = true;
     checkLogs = nextCheckLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
     data = applyLatestCheckStateToData(nextData);
+    if (pedLayoutMigrated) saveData();
     renderInspectors();
     cloudSyncPaused = false;
     render();
