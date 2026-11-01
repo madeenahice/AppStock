@@ -513,7 +513,7 @@ function getUnitIcon(unit) {
   return `<svg class="unit-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[unit] || icons.Dashboard}</svg>`;
 }
 
-function render() {
+function render({ preserveStockScroll = false } = {}) {
   document.body.classList.toggle("home-view", activeView === "home");
   document.body.classList.toggle("dashboard-view", activeView === "dashboard");
   els.homeButton.classList.toggle("active", activeView === "home");
@@ -536,7 +536,7 @@ function render() {
   renderDashboard();
   renderAlerts();
   renderCheckLog();
-  if (activeView === "unit") renderStockList();
+  if (activeView === "unit") renderStockList({ preserveScroll: preserveStockScroll });
 }
 
 function renderPageHeader() {
@@ -1009,7 +1009,11 @@ function alertText(item) {
   return `เหลือ ${daysUntil(item.expiryDate)} วัน`;
 }
 
-function renderStockList() {
+function renderStockList({ preserveScroll = false } = {}) {
+  const currentTable = els.stockList.querySelector(".stock-table-wrap");
+  const previousScroll = preserveScroll && currentTable
+    ? { top: currentTable.scrollTop, left: currentTable.scrollLeft }
+    : null;
   const filteredItems = latestItemsForUnit(activeUnit).filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm);
       const matchesStatus = statusMatchesFilter(item, activeUnit);
@@ -1116,7 +1120,7 @@ function renderStockList() {
       syncLatestLogItem(activeUnit, editableItem);
       saveData();
       saveCheckLogs();
-      render();
+      render({ preserveStockScroll: true });
     });
     row.querySelector(".temperature-status")?.addEventListener("change", event => updateTemperatureStatus(editableItem.id, event.target.value));
     row.querySelector(".temperature-input")?.addEventListener("change", event => updateTemperature(editableItem.id, event.target.value));
@@ -1126,6 +1130,10 @@ function renderStockList() {
   });
 
   els.stockList.append(tableWrap);
+  if (previousScroll) {
+    tableWrap.scrollTop = previousScroll.top;
+    tableWrap.scrollLeft = previousScroll.left;
+  }
 }
 
 function groupItemsByLocation(items) {
@@ -1200,7 +1208,7 @@ function updateQty(id, nextQty) {
   syncLatestLogItem(activeUnit, item);
   saveData();
   saveCheckLogs();
-  render();
+  render({ preserveStockScroll: true });
 }
 
 function syncLatestLogItem(unit, item) {
@@ -1229,7 +1237,7 @@ function updateTemperatureStatus(id, nextStatus) {
   item.equipmentStatus = nextStatus === "ส่งซ่อม" ? "ส่งซ่อม" : "พร้อมใช้";
   if (item.equipmentStatus === "ส่งซ่อม") item.temperature = null;
   saveData();
-  render();
+  render({ preserveStockScroll: true });
 }
 
 function updateTemperature(id, nextValue) {
@@ -1238,13 +1246,13 @@ function updateTemperature(id, nextValue) {
   const value = Number(nextValue);
   if (!Number.isFinite(value) || value < 0 || value > 5) {
     alert("กรุณาใส่อุณหภูมิตู้เย็นระหว่าง 0.00-5.00 °C");
-    render();
+    render({ preserveStockScroll: true });
     return;
   }
   item.equipmentStatus = "พร้อมใช้";
   item.temperature = value;
   saveData();
-  render();
+  render({ preserveStockScroll: true });
 }
 
 function validateTemperatureChecks(unit) {
