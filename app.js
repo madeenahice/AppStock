@@ -5,7 +5,7 @@ const UNIT_EXPIRY_WINDOWS = {
 };
 const UNIT_ALIASES = { "ยารถ Emer": "Emer medicine", "กล่องยา EMER": "Emer medicine", "รถ EMER adult": "Emer cart Adult", "รถ EMER ped": "Emer cart PED" };
 const INSPECTORS_KEY = "med-stock-inspectors-v1";
-const SHORTAGE_REASONS = ["รอเบิก", "ตามไม่ได้"];
+const SHORTAGE_REASONS = ["รอเบิก", "ต้องตามหา"];
 const EQUIPMENT_SHORTAGE_REASONS = ["ถูกยืม", "ส่งซ่อม"];
 const SHIFTS = ["เวรดึก", "เวรเช้า", "เวรบ่าย"];
 const PED_LAYOUT_VERSION_KEY = "med-stock-ped-layout-version";
@@ -559,7 +559,8 @@ function shortageReasons(unit) {
 }
 
 function shortageReason(item, unit = item.unit || activeUnit) {
-  return Number(item.countedQty) < Number(item.requiredQty) && shortageReasons(unit).includes(item.shortageReason) ? item.shortageReason : "";
+  const reason = item.shortageReason === "ตามไม่ได้" ? "ต้องตามหา" : item.shortageReason;
+  return Number(item.countedQty) < Number(item.requiredQty) && shortageReasons(unit).includes(reason) ? reason : "";
 }
 
 function latestUnitLog(unit) {
@@ -632,7 +633,7 @@ function renderShortageOverview() {
   const items = latestAllItems();
   const groups = [
     { reason: "รอเบิก", tone: "amber", icon: '<path d="M5 7h14v13H5zM9 7V4h6v3M9 12h6M12 9v6"/>' },
-    { reason: "ตามไม่ได้", tone: "rose", icon: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M8.5 8.5l4 4m0-4-4 4"/>' },
+    { reason: "ต้องตามหา", tone: "rose", icon: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M8.5 8.5l4 4m0-4-4 4"/>' },
     { reason: "ถูกยืม", tone: "blue", icon: '<path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4"/>' },
     { reason: "ส่งซ่อม", tone: "violet", icon: '<path d="M14 4a6 6 0 0 0-7 8L3 16a3 3 0 0 0 5 5l4-4a6 6 0 0 0 8-7l-4 3-4-4z"/>' },
   ];
@@ -679,7 +680,7 @@ function getItemStatus(item, unit = item.unit || activeUnit) {
   if (Number(item.countedQty) < Number(item.requiredQty)) {
     const reason = shortageReason(item, unit);
     if (reason === "รอเบิก") return { key: "waiting", group: "short", label: "รอเบิก" };
-    if (reason === "ตามไม่ได้") return { key: "missing", group: "short", label: "ตามไม่ได้" };
+    if (reason === "ต้องตามหา") return { key: "missing", group: "short", label: "ต้องตามหา" };
     if (reason === "ถูกยืม") return { key: "borrowed", group: "short", label: "ถูกยืม" };
     if (reason === "ส่งซ่อม") return { key: "repair", group: "short", label: "ส่งซ่อม" };
     return { key: "short", group: "short", label: "ต่ำกว่าเกณฑ์" };
