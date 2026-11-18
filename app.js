@@ -77,6 +77,9 @@ let cloudSaveTimer = null;
 let stateRevision = 0;
 
 const els = {
+  addItemButton: document.querySelector("#addItemButton"),
+  addStockWrap: document.querySelector("#addStockWrap"),
+  addStockQty: document.querySelector("#addStockQty"),
   unitTabs: document.querySelector("#unitTabs"),
   homeButton: document.querySelector("#homeButton"),
   mobileUnitSelect: document.querySelector("#mobileUnitSelect"),
@@ -361,6 +364,7 @@ function saveCheckLogs() {
 }
 
 function bindEvents() {
+  els.addItemButton.addEventListener("click", () => openItemDialog());
   els.searchInput.addEventListener("input", () => {
     searchTerm = els.searchInput.value.trim().toLowerCase();
     renderStockList();
@@ -1108,7 +1112,7 @@ function renderStockList({ preserveScroll = false } = {}) {
         : (item.expiryDate ? escapeHtml(formatDate(item.expiryDate)) : '<span class="muted-cell">ไม่มีวันหมดอายุ</span>')}</td>
       <td><span class="${statusBadgeClass(status.key)}">${escapeHtml(status.label)}</span></td>
       <td>${item.checkedAt ? escapeHtml(formatDateTime(item.checkedAt)) : '<span class="muted-cell">ยังไม่ตรวจ</span>'}</td>
-      <td class="action-col"><button class="text-button edit-button" type="button">แก้ไข</button></td>
+      <td class="action-col"><button class="text-button edit-button" type="button">แก้ไข</button>${isEquipmentTemperatureItem(item) ? "" : '<button class="text-button restock-button" type="button">เพิ่มสต๊อก</button>'}</td>
     `;
 
     const input = row.querySelector(".qty-input");
@@ -1121,6 +1125,11 @@ function renderStockList({ preserveScroll = false } = {}) {
       row.querySelector(".decrease").addEventListener("click", () => updateQty(editableItem.id, Math.max(0, Number(editableItem.countedQty) - 1)));
       row.querySelector(".increase").addEventListener("click", () => updateQty(editableItem.id, Number(editableItem.countedQty) + 1));
     }
+    row.querySelector(".restock-button")?.addEventListener("click", () => {
+      openItemDialog(editableItem);
+      els.addStockQty.focus();
+      els.addStockQty.select();
+    });
     row.querySelector(".edit-button").addEventListener("click", () => openItemDialog(editableItem));
     row.querySelector(".shortage-select")?.addEventListener("change", event => {
       editableItem.shortageReason = event.target.value;
@@ -1316,6 +1325,8 @@ function openItemDialog(item = null) {
   els.itemName.value = item?.name || "";
   els.requiredQty.value = item ? item.requiredQty ?? "" : 1;
   els.countedQty.value = item?.countedQty ?? 0;
+  els.addStockWrap.hidden = !editing || isTemperatureItem;
+  els.addStockQty.value = 0;
   els.noExpiry.checked = !item?.expiryDate;
   els.expiryDate.value = item?.expiryDate || localDate();
   els.equipmentFields.hidden = !isTemperatureItem;
@@ -1354,12 +1365,19 @@ function saveItem(event) {
     alert("กรุณาใส่อุณหภูมิตู้เย็นระหว่าง 0.00-5.00 °C");
     return;
   }
+  const requiredQty = Number(els.requiredQty.value);
+  const countedQty = Number(els.countedQty.value);
+  const addedQty = existingItem && !isTemperatureItem ? Number(els.addStockQty.value) : 0;
+  if (!name || (!isTemperatureItem && ![requiredQty, countedQty, addedQty, countedQty + addedQty].every(value => Number.isSafeInteger(value) && value >= 0))) {
+    alert("กรุณาระบุชื่อรายการและจำนวนเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป");
+    return;
+  }
   const nextItem = {
     id,
     name,
     location: existingItem?.location || "",
-    requiredQty: isTemperatureItem ? null : Number(els.requiredQty.value) || 0,
-    countedQty: isTemperatureItem ? 0 : Number(els.countedQty.value) || 0,
+    requiredQty: isTemperatureItem ? null : requiredQty,
+    countedQty: isTemperatureItem ? 0 : countedQty + addedQty,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
     equipmentStatus,
     temperature: isTemperatureItem && equipmentStatus === "พร้อมใช้" ? temperatureValue : null,
@@ -1428,15 +1446,17 @@ function upgradePedCartLayout(target, force = false) {
     "3-piece (ชั้น 1 Radiant warmmer)",
     "Tegaderm 4*4 (ชั้น 1 Radiant warmmer)",
   ].includes(item.name));
-  const hasUncategorizedLegacyList = currentItems.length >= 50 && currentItems.some(item => !item.location);
+  const hasUncategorizedLegacyList = currentItems.filter(item => !item.location && item.sourceId).length >= 50;
   if (!hasLegacyNames && !hasUncategorizedLegacyList) {
     localStorage.setItem(PED_LAYOUT_VERSION_KEY, PED_LAYOUT_VERSION);
     return false;
   }
   const byName = new Map(currentItems.map(item => [normalizeName(item.name), item]));
 
+  const matchedItems = new Set();
   target["Emer cart PED"] = PED_CART_LAYOUT.map(([location, name, requiredQty, aliases = []], index) => {
     const existing = [name, ...aliases].map(alias => byName.get(normalizeName(alias))).find(Boolean);
+    if (existing) matchedItems.add(existing);
     return {
       ...(existing || {}),
       id: existing?.id || `ped-layout-${index + 1}`,
@@ -1453,6 +1473,7 @@ function upgradePedCartLayout(target, force = false) {
       shortageReason: existing?.shortageReason || "",
     };
   });
+  target["Emer cart PED"].push(...currentItems.filter(item => !matchedItems.has(item) && !item.sourceId));
   localStorage.setItem(PED_LAYOUT_VERSION_KEY, PED_LAYOUT_VERSION);
   return true;
 }

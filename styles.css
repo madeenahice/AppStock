@@ -1974,7 +1974,7 @@ h1 {
   .stock-list,
   .alert-list,
   .check-log-list {
-    padding: 10px;
+    padding: 6px;
   }
 
   .stock-table {
@@ -1996,8 +1996,8 @@ h1 {
 
   .stock-table tbody {
     display: grid;
-    gap: 10px;
-    padding: 10px;
+    gap: 6px;
+    padding: 6px;
   }
 
   .stock-table tr {
@@ -2009,7 +2009,7 @@ h1 {
 
   .stock-table th,
   .stock-table td {
-    padding: 9px 12px;
+    padding: 7px 10px;
     border-bottom: 1px solid var(--line);
     text-align: left;
   }
@@ -2034,6 +2034,10 @@ h1 {
 
   .stock-table td:nth-child(1)::before {
     content: none;
+  }
+
+  .stock-table td:nth-child(1) > span {
+    display: none;
   }
 
   .stock-table td:nth-child(2)::before {
@@ -2070,6 +2074,11 @@ h1 {
 
   .stock-table td:last-child {
     border-bottom: 0;
+  }
+
+  .stock-table td:nth-child(2),
+  .stock-table td:nth-child(7) {
+    display: none;
   }
 
   .stock-table .number-cell,
@@ -2166,3 +2175,7 @@ h1 {
 .inspection-bar p { flex: 1 1 220px; white-space: normal; }
 .unit-tabs { overflow-y: auto; min-height: 0; }
 @media (max-width: 560px) { .inspection-bar label { width: 100%; flex-basis: 100%; } }
+
+/* Keep stock creation visible above the inspection form on all screen sizes. */
+.stock-section > .section-heading { flex-wrap: wrap; gap: 10px; }
+#addItemButton { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; min-height: 44px; white-space: nowrap; }
