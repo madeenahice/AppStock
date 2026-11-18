@@ -19,6 +19,7 @@ const PED_CART_LAYOUT = [
   ["รถ Emer ชั้น 4", "O2 mask with bag (Ped)", 1], ["รถ Emer ชั้น 4", "Ambu-bag (Neonatal)", 1], ["รถ Emer ชั้น 4", "Ambu-bag (Ped)", 1], ["รถ Emer ชั้น 4", "Sterile gloves No. 6", 2], ["รถ Emer ชั้น 4", "Sterile gloves No. 6.5", 2], ["รถ Emer ชั้น 4", "Sterile gloves No. 7", 2], ["รถ Emer ชั้น 4", "Sterile gloves No. 7.5", 2], ["รถ Emer ชั้น 4", "CPE Gown", 2], ["รถ Emer ชั้น 4", "Glasses", 1], ["รถ Emer ชั้น 4", "ถังออกซิเจน (กรณีไม่มี Oxygen Pipe line)", 0], ["รถ Emer ชั้น 4", "CPR Board", 1],
   ["Radiant warmer", "Oxygen tube", 2, ["Oxygen tube (ชั้น 1 Radiant warmmer)"]], ["Radiant warmer", "3-piece", 2, ["3-piece (ชั้น 1 Radiant warmmer)"]], ["Radiant warmer", "Tegaderm 4*4", 3, ["Tegaderm 4*4 (ชั้น 1 Radiant warmmer)"]], ["Radiant warmer", "Plastic wrap", 2, ["Plastic wrap (ชั้น 2 Radiant warmmer)"]], ["Radiant warmer", "Thermo trace central", 3, ["Thermo trace central (ชั้น 2 Radiant warmmer)"]], ["Radiant warmer", "Thermo trace peripheral", 3, ["Thermo trace peripheral (ชั้น 2 Radiant warmmer)"]],
 ];
+const STATE_UPDATED_KEY = "med-stock-state-updated-at";
 const STORAGE_KEY = "cute-med-stock-v3";
 const CATALOG_VERSION_KEY = "med-stock-catalog-version";
 const CATALOG_VERSION = window.SEED_CATALOG_VERSION || "";
@@ -347,6 +348,7 @@ function loadCheckLogs() {
 
 function saveData() {
   stateRevision += 1;
+  localStorage.setItem(STATE_UPDATED_KEY, new Date().toISOString());
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
   localStorage.setItem(REQUIRED_BASELINE_KEY, CATALOG_VERSION);
@@ -359,6 +361,7 @@ function saveSettings() {
 
 function saveCheckLogs() {
   stateRevision += 1;
+  localStorage.setItem(STATE_UPDATED_KEY, new Date().toISOString());
   localStorage.setItem(CHECK_LOG_KEY, JSON.stringify(checkLogs));
   queueCloudStateSave();
 }
@@ -583,6 +586,7 @@ function latestItemState(item, unit = item.unit || activeUnit) {
   return {
     ...item,
     ...latestItem,
+    ...(item.stockUpdatedAt ? item : {}),
     unit,
     inspector: latestLog.inspector || item.inspector || "",
     checkedAt: latestLog.checkedAt || item.checkedAt || "",
@@ -604,7 +608,7 @@ function applyLatestCheckStateToData(sourceData) {
     if (!latestLog?.items?.length || !Array.isArray(nextData[unit])) return;
     nextData[unit].forEach(item => {
       const latestItem = latestLog.items.find(entry => normalizeName(entry.name) === normalizeName(item.name));
-      if (!latestItem) return;
+      if (!latestItem || item.stockUpdatedAt) return;
       if (Number.isFinite(Number(latestItem.countedQty))) item.countedQty = Number(latestItem.countedQty);
       if ("expiryDate" in latestItem) item.expiryDate = latestItem.expiryDate || null;
       item.shortageReason = latestItem.shortageReason || "";
@@ -1224,7 +1228,9 @@ function updateQty(id, nextQty) {
 function rememberQty(id, nextQty) {
   const item = data[activeUnit].find((entry) => entry.id === id);
   if (!item) return false;
-  item.countedQty = Math.max(0, Number(nextQty) || 0);
+  if (!Number.isSafeInteger(Number(nextQty)) || Number(nextQty) < 0) return false;
+  item.stockUpdatedAt = new Date().toISOString();
+  item.countedQty = Number(nextQty);
   if (item.countedQty >= Number(item.requiredQty)) item.shortageReason = "";
   syncLatestLogItem(activeUnit, item);
   saveData();
@@ -1373,6 +1379,7 @@ function saveItem(event) {
     return;
   }
   const nextItem = {
+    stockUpdatedAt: new Date().toISOString(),
     id,
     name,
     location: existingItem?.location || "",
@@ -1463,7 +1470,7 @@ function upgradePedCartLayout(target, force = false) {
       sourceId: existing?.sourceId || `ped-layout-${index + 1}`,
       name,
       location,
-      requiredQty,
+      requiredQty: existing?.stockUpdatedAt ? existing.requiredQty : requiredQty,
       countedQty: Number.isFinite(Number(existing?.countedQty)) ? Number(existing.countedQty) : requiredQty,
       expiryDate: existing?.expiryDate || null,
       inspector: existing?.inspector || "",
@@ -1612,7 +1619,7 @@ async function saveCloudState() {
       catalogVersion: CATALOG_VERSION,
       requiredBaselineVersion: localStorage.getItem(REQUIRED_BASELINE_KEY) || "",
     source: "med-stock",
-    updatedAt: new Date().toISOString(),
+    updatedAt: localStorage.getItem(STATE_UPDATED_KEY) || new Date().toISOString(),
     data,
     checkLogs,
     inspectors: inspectorNames(),
@@ -1656,6 +1663,7 @@ async function clearSavedState() {
   showToast("กำลังล้างข้อมูลที่เว็บจำไว้");
   await clearCloudState();
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(STATE_UPDATED_KEY);
   localStorage.removeItem(CHECK_LOG_KEY);
   localStorage.removeItem(INSPECTORS_KEY);
   localStorage.removeItem("med-stock-source-version");
@@ -1691,13 +1699,34 @@ async function loadCloudState() {
       return;
     }
 
+    const localUpdated = localStorage.getItem(STATE_UPDATED_KEY);
+    const cloudUpdated = response.state.updatedAt;
+    if (localUpdated && (!Number.isFinite(Date.parse(cloudUpdated)) || Date.parse(localUpdated) >= Date.parse(cloudUpdated))) {
+      void saveCloudState();
+      return;
+    }
     const nextData = ensureCatalogItems(normalizeImportedData(response.state.data, { preserveRequiredQty: response.state.requiredBaselineVersion === CATALOG_VERSION || localStorage.getItem(REQUIRED_BASELINE_KEY) === CATALOG_VERSION }));
-    const pedLayoutMigrated = upgradePedCartLayout(nextData, true);
+    upgradePedCartLayout(nextData, true);
+    // A snapshot upload time does not necessarily indicate an actual stock edit.
+    UNITS.forEach(unit => {
+      (data[unit] || []).filter(item => item.stockUpdatedAt).forEach(localItem => {
+        const index = nextData[unit].findIndex(remote => remote.id === localItem.id || (remote.sourceId && remote.sourceId === localItem.sourceId) || normalizeName(remote.name) === normalizeName(localItem.name));
+        const remote = nextData[unit][index];
+        if (remote && Date.parse(remote.stockUpdatedAt) > Date.parse(localItem.stockUpdatedAt)) return;
+        if (index >= 0) nextData[unit][index] = cloneData(localItem);
+        else nextData[unit].push(cloneData(localItem));
+      });
+    });
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
     cloudSyncPaused = true;
     checkLogs = nextCheckLogs.map(log => ({ ...log, unit: UNIT_ALIASES[log.unit] || log.unit }));
     data = applyLatestCheckStateToData(nextData);
-    if (pedLayoutMigrated) saveData();
+    // Persist the accepted snapshot without treating the download as a user edit.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(CHECK_LOG_KEY, JSON.stringify(checkLogs));
+    localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
+    localStorage.setItem(REQUIRED_BASELINE_KEY, CATALOG_VERSION);
+    if (cloudUpdated && Number.isFinite(Date.parse(cloudUpdated))) localStorage.setItem(STATE_UPDATED_KEY, cloudUpdated);
     renderInspectors();
     cloudSyncPaused = false;
     render();
@@ -1767,7 +1796,7 @@ function normalizeImportedData(importedData, options = {}) {
           sourceId: seed.sourceId,
           name: seed.name,
           location: seed.location || "",
-          requiredQty: preserveRequiredQty && Number.isFinite(Number(item.requiredQty)) ? Number(item.requiredQty) : seed.requiredQty,
+          requiredQty: (preserveRequiredQty || item.stockUpdatedAt) && item.requiredQty != null && Number.isFinite(Number(item.requiredQty)) ? Number(item.requiredQty) : seed.requiredQty,
           countedQty: Number.isFinite(Number(item.countedQty)) ? Number(item.countedQty) : seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
           temperatureRange: seed.temperatureRange || item.temperatureRange || null,
