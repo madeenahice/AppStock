@@ -78,9 +78,8 @@ let cloudSaveTimer = null;
 let stateRevision = 0;
 
 const els = {
+  requiredHistory: document.querySelector("#requiredHistory"),
   addItemButton: document.querySelector("#addItemButton"),
-  addStockWrap: document.querySelector("#addStockWrap"),
-  addStockQty: document.querySelector("#addStockQty"),
   unitTabs: document.querySelector("#unitTabs"),
   homeButton: document.querySelector("#homeButton"),
   mobileUnitSelect: document.querySelector("#mobileUnitSelect"),
@@ -269,11 +268,20 @@ function loadData() {
   const legacySourceVersion = localStorage.getItem("med-stock-source-version");
   localStorage.removeItem?.("med-stock-source-version");
   if (legacySourceVersion) {
+    let addedItems = {};
+    try {
+      const previous = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      Object.entries(previous).forEach(([unit, items]) => {
+        addedItems[unit] = Array.isArray(items) ? items.filter(item => item.isCustom || item.stockUpdatedAt) : [];
+      });
+    } catch {}
     localStorage.removeItem?.(STORAGE_KEY);
     localStorage.removeItem?.(CHECK_LOG_KEY);
     localStorage.removeItem?.(CATALOG_VERSION_KEY);
     localStorage.removeItem?.(REQUIRED_BASELINE_KEY);
-    return cloneData(defaultData);
+    const restored = normalizeImportedData(addedItems);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
+    return restored;
   }
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return cloneData(defaultData);
@@ -313,7 +321,7 @@ function ensureCatalogItems(target) {
   UNITS.forEach(unit => {
     if (!Array.isArray(target[unit])) target[unit] = [];
     defaultData[unit].forEach((seed, index) => {
-      const exists = target[unit].some(item => normalizeName(item.name) === normalizeName(seed.name));
+      const exists = target[unit].some(item => !item.isCustom && normalizeName(item.name) === normalizeName(seed.name));
       if (!exists) target[unit].splice(index, 0, cloneData(seed));
     });
   });
@@ -1116,7 +1124,7 @@ function renderStockList({ preserveScroll = false } = {}) {
         : (item.expiryDate ? escapeHtml(formatDate(item.expiryDate)) : '<span class="muted-cell">ไม่มีวันหมดอายุ</span>')}</td>
       <td><span class="${statusBadgeClass(status.key)}">${escapeHtml(status.label)}</span></td>
       <td>${item.checkedAt ? escapeHtml(formatDateTime(item.checkedAt)) : '<span class="muted-cell">ยังไม่ตรวจ</span>'}</td>
-      <td class="action-col"><button class="text-button edit-button" type="button">แก้ไข</button>${isEquipmentTemperatureItem(item) ? "" : '<button class="text-button restock-button" type="button">เพิ่มสต๊อก</button>'}</td>
+      <td class="action-col"><button class="text-button edit-button" type="button">แก้ไข</button></td>
     `;
 
     const input = row.querySelector(".qty-input");
@@ -1129,11 +1137,6 @@ function renderStockList({ preserveScroll = false } = {}) {
       row.querySelector(".decrease").addEventListener("click", () => updateQty(editableItem.id, Math.max(0, Number(editableItem.countedQty) - 1)));
       row.querySelector(".increase").addEventListener("click", () => updateQty(editableItem.id, Number(editableItem.countedQty) + 1));
     }
-    row.querySelector(".restock-button")?.addEventListener("click", () => {
-      openItemDialog(editableItem);
-      els.addStockQty.focus();
-      els.addStockQty.select();
-    });
     row.querySelector(".edit-button").addEventListener("click", () => openItemDialog(editableItem));
     row.querySelector(".shortage-select")?.addEventListener("change", event => {
       editableItem.shortageReason = event.target.value;
@@ -1331,8 +1334,6 @@ function openItemDialog(item = null) {
   els.itemName.value = item?.name || "";
   els.requiredQty.value = item ? item.requiredQty ?? "" : 1;
   els.countedQty.value = item?.countedQty ?? 0;
-  els.addStockWrap.hidden = !editing || isTemperatureItem;
-  els.addStockQty.value = 0;
   els.noExpiry.checked = !item?.expiryDate;
   els.expiryDate.value = item?.expiryDate || localDate();
   els.equipmentFields.hidden = !isTemperatureItem;
@@ -1341,6 +1342,7 @@ function openItemDialog(item = null) {
   els.deleteItemButton.hidden = !editing;
   syncExpiryField();
   syncEquipmentFields();
+  renderRequiredHistory(item);
   els.itemDialog.showModal();
 }
 
@@ -1359,6 +1361,40 @@ function syncEquipmentFields() {
   if (!needsTemperature) els.temperature.value = "";
 }
 
+
+function requiredHistoryEntries(...histories) {
+  const byId = new Map();
+  histories.flat().forEach(entry => {
+    if (!entry || !entry.id || !Number.isFinite(Date.parse(entry.changedAt)) || !Number.isSafeInteger(entry.to) || entry.to < 0) return;
+    byId.set(entry.id, entry);
+  });
+  return [...byId.values()].sort((a, b) => Date.parse(a.changedAt) - Date.parse(b.changedAt) || String(a.id).localeCompare(String(b.id)));
+}
+
+function restoreRequiredQuantity(item) {
+  const history = requiredHistoryEntries(item.requiredQtyHistory || []);
+  if (history.length) {
+    item.requiredQtyHistory = history;
+    item.requiredQty = history.at(-1).to;
+  }
+  return item;
+}
+
+function recordRequiredQuantityChange(previous, next) {
+  next.requiredQtyHistory = requiredHistoryEntries(previous?.requiredQtyHistory || []);
+  if (next.requiredQty == null || (previous && previous.requiredQty === next.requiredQty)) return;
+  const last = next.requiredQtyHistory.at(-1);
+  const changedAt = new Date(Math.max(Date.now(), last ? Date.parse(last.changedAt) + 1 : 0)).toISOString();
+  next.requiredQtyHistory.push({id:createId(), changedAt, from:previous?.requiredQty ?? null, to:next.requiredQty});
+}
+
+function renderRequiredHistory(item) {
+  const history = requiredHistoryEntries(item?.requiredQtyHistory || []);
+  els.requiredHistory.hidden = !item || isEquipmentTemperatureItem(item);
+  els.requiredHistory.innerHTML = '<summary>ประวัติแก้จำนวนที่ต้องมี (' + history.length + ')</summary>' +
+    (history.length ? '<ol>' + [...history].reverse().map(entry => '<li>' + escapeHtml(formatDateTime(entry.changedAt)) + ' · ' + escapeHtml(entry.from ?? 'ตั้งต้น') + ' → <strong>' + escapeHtml(entry.to) + '</strong></li>').join('') + '</ol>' : '<p>ยังไม่มีประวัติการแก้ไขจำนวนที่ต้องมี</p>');
+}
+
 function saveItem(event) {
   event.preventDefault();
   const id = els.editingId.value || createId();
@@ -1373,18 +1409,19 @@ function saveItem(event) {
   }
   const requiredQty = Number(els.requiredQty.value);
   const countedQty = Number(els.countedQty.value);
-  const addedQty = existingItem && !isTemperatureItem ? Number(els.addStockQty.value) : 0;
-  if (!name || (!isTemperatureItem && ![requiredQty, countedQty, addedQty, countedQty + addedQty].every(value => Number.isSafeInteger(value) && value >= 0))) {
+  if (!name || (!isTemperatureItem && ![requiredQty, countedQty].every(value => Number.isSafeInteger(value) && value >= 0))) {
     alert("กรุณาระบุชื่อรายการและจำนวนเป็นจำนวนเต็มตั้งแต่ 0 ขึ้นไป");
     return;
   }
   const nextItem = {
     stockUpdatedAt: new Date().toISOString(),
+    isCustom: existingItem ? Boolean(existingItem.isCustom || !existingItem.sourceId) : true,
+    createdAt: existingItem?.createdAt || new Date().toISOString(),
     id,
     name,
     location: existingItem?.location || "",
     requiredQty: isTemperatureItem ? null : requiredQty,
-    countedQty: isTemperatureItem ? 0 : countedQty + addedQty,
+    countedQty: isTemperatureItem ? 0 : countedQty,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
     equipmentStatus,
     temperature: isTemperatureItem && equipmentStatus === "พร้อมใช้" ? temperatureValue : null,
@@ -1396,6 +1433,7 @@ function saveItem(event) {
     shortageReason: existingItem?.shortageReason || "",
     sourceId: existingItem?.sourceId || "",
   };
+  recordRequiredQuantityChange(existingItem, nextItem);
   if (nextItem.countedQty >= nextItem.requiredQty) nextItem.shortageReason = "";
 
   const index = data[activeUnit].findIndex((item) => item.id === id);
@@ -1470,7 +1508,7 @@ function upgradePedCartLayout(target, force = false) {
       sourceId: existing?.sourceId || `ped-layout-${index + 1}`,
       name,
       location,
-      requiredQty: existing?.stockUpdatedAt ? existing.requiredQty : requiredQty,
+      requiredQty: existing?.requiredQty != null && Number.isSafeInteger(Number(existing.requiredQty)) && Number(existing.requiredQty) >= 0 ? Number(existing.requiredQty) : requiredQty,
       countedQty: Number.isFinite(Number(existing?.countedQty)) ? Number(existing.countedQty) : requiredQty,
       expiryDate: existing?.expiryDate || null,
       inspector: existing?.inspector || "",
@@ -1480,7 +1518,7 @@ function upgradePedCartLayout(target, force = false) {
       shortageReason: existing?.shortageReason || "",
     };
   });
-  target["Emer cart PED"].push(...currentItems.filter(item => !matchedItems.has(item) && !item.sourceId));
+  target["Emer cart PED"].push(...currentItems.filter(item => !matchedItems.has(item) && (item.isCustom || !item.sourceId)));
   localStorage.setItem(PED_LAYOUT_VERSION_KEY, PED_LAYOUT_VERSION);
   return true;
 }
@@ -1709,12 +1747,15 @@ async function loadCloudState() {
     upgradePedCartLayout(nextData, true);
     // A snapshot upload time does not necessarily indicate an actual stock edit.
     UNITS.forEach(unit => {
-      (data[unit] || []).filter(item => item.stockUpdatedAt).forEach(localItem => {
-        const index = nextData[unit].findIndex(remote => remote.id === localItem.id || (remote.sourceId && remote.sourceId === localItem.sourceId) || normalizeName(remote.name) === normalizeName(localItem.name));
+      (data[unit] || []).filter(item => item.stockUpdatedAt || item.isCustom || !item.sourceId).forEach(localItem => {
+        const index = nextData[unit].findIndex(remote => remote.id === localItem.id || (!localItem.isCustom && !remote.isCustom && ((remote.sourceId && remote.sourceId === localItem.sourceId) || normalizeName(remote.name) === normalizeName(localItem.name))));
         const remote = nextData[unit][index];
-        if (remote && Date.parse(remote.stockUpdatedAt) > Date.parse(localItem.stockUpdatedAt)) return;
-        if (index >= 0) nextData[unit][index] = cloneData(localItem);
-        else nextData[unit].push(cloneData(localItem));
+        const history = requiredHistoryEntries(localItem.requiredQtyHistory || [], remote?.requiredQtyHistory || []);
+        const selected = remote && Date.parse(remote.stockUpdatedAt) > Date.parse(localItem.stockUpdatedAt) ? remote : cloneData(localItem);
+        selected.requiredQtyHistory = history;
+        restoreRequiredQuantity(selected);
+        if (index >= 0) nextData[unit][index] = selected;
+        else nextData[unit].push(selected);
       });
     });
     const nextCheckLogs = Array.isArray(response.state.checkLogs) ? response.state.checkLogs : [];
@@ -1771,7 +1812,7 @@ function jsonpRequest(url, params = {}) {
 }
 
 function normalizeImportedData(importedData, options = {}) {
-  const preserveRequiredQty = Boolean(options.preserveRequiredQty);
+  // Saved requirements remain authoritative across catalog upgrades.
   const normalized = {};
   UNITS.forEach((unit) => {
     const keys = [unit, ...Object.keys(UNIT_ALIASES).filter(key => UNIT_ALIASES[key] === unit)];
@@ -1786,7 +1827,7 @@ function normalizeImportedData(importedData, options = {}) {
     const catalogByName = new Map(catalogItems.map(item => [normalizeName(item.name), item]));
     const catalogNames = new Set(catalogByName.keys());
     const catalogBacked = importedItems
-      .filter(item => catalogNames.has(normalizeName(item.name)))
+      .filter(item => !item.isCustom && catalogNames.has(normalizeName(item.name)))
       .map(item => {
         const seed = catalogByName.get(normalizeName(item.name));
         return {
@@ -1796,7 +1837,7 @@ function normalizeImportedData(importedData, options = {}) {
           sourceId: seed.sourceId,
           name: seed.name,
           location: seed.location || "",
-          requiredQty: (preserveRequiredQty || item.stockUpdatedAt) && item.requiredQty != null && Number.isFinite(Number(item.requiredQty)) ? Number(item.requiredQty) : seed.requiredQty,
+          requiredQty: item.requiredQty != null && Number.isSafeInteger(Number(item.requiredQty)) && Number(item.requiredQty) >= 0 ? Number(item.requiredQty) : seed.requiredQty,
           countedQty: Number.isFinite(Number(item.countedQty)) ? Number(item.countedQty) : seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
           temperatureRange: seed.temperatureRange || item.temperatureRange || null,
@@ -1805,9 +1846,9 @@ function normalizeImportedData(importedData, options = {}) {
     const customItems = importedItems.filter(item => {
       const hasCatalogKey = catalogNames.has(normalizeName(item.name));
       const looksLikeOldCatalogItem = Boolean(item.sourceId && (String(item.sourceId).startsWith("rn-source-") || item.sourceId === "equipment-fridge-temperature"));
-      return !hasCatalogKey && !looksLikeOldCatalogItem;
+      return item.isCustom || (!hasCatalogKey && !looksLikeOldCatalogItem);
     });
-    normalized[unit] = [...catalogBacked, ...customItems];
+    normalized[unit] = [...catalogBacked, ...customItems].map(restoreRequiredQuantity);
   });
   return ensureCatalogItems(normalized);
 }

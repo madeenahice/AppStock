@@ -2179,3 +2179,8 @@ h1 {
 /* Keep stock creation visible above the inspection form on all screen sizes. */
 .stock-section > .section-heading { flex-wrap: wrap; gap: 10px; }
 #addItemButton { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; min-height: 44px; white-space: nowrap; }
+
+.required-history { margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 8px; }
+.required-history summary { cursor: pointer; font-weight: 700; }
+.required-history ol { padding-left: 24px; max-height: 180px; overflow-y: auto; }
+.required-history li { margin: 8px 0; font-size: .9rem; }
