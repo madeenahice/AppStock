@@ -1530,7 +1530,6 @@ function upgradePedCartLayout(target, force = false) {
 }
 
 function savedItemLocation(item, seed = {}) {
-  if (item?.locationUpdatedAt && typeof item.location === "string") return item.location;
   return String(item?.location || "").trim() || seed.location || "";
 }
 
@@ -1836,6 +1835,13 @@ function normalizeImportedData(importedData, options = {}) {
     });
     const catalogItems = defaultData[unit] || [];
     const catalogByName = new Map(catalogItems.map(item => [normalizeName(item.name), item]));
+    // Match renamed PED items before pruning obsolete catalog entries.
+    if (unit === "Emer cart PED") {
+      PED_CART_LAYOUT.forEach(([, name, , aliases = []]) => {
+        const seed = catalogByName.get(normalizeName(name));
+        if (seed) aliases.forEach(alias => catalogByName.set(normalizeName(alias), seed));
+      });
+    }
     const catalogNames = new Set(catalogByName.keys());
     const catalogBacked = importedItems
       .filter(item => !item.isCustom && catalogNames.has(normalizeName(item.name)))
