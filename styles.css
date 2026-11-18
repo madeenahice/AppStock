@@ -2183,3 +2183,10 @@ h1 {
 .required-history summary { cursor: pointer; font-weight: 700; }
 .required-history ol { padding-left: 24px; max-height: 180px; overflow-y: auto; }
 .required-history li { margin: 8px 0; font-size: .9rem; }
+
+.stock-add-actions { order: 5; padding: 12px; display: flex; justify-content: flex-end; }
+@media (max-width: 560px) {
+  .stock-add-actions #addItemButton { width: 100%; }
+  .stock-table td:nth-child(2) { display: grid; }
+  .stock-table .stock-location-heading th { position: static; white-space: normal; }
+}

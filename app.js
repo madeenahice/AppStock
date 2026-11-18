@@ -1425,6 +1425,7 @@ function saveItem(event) {
     id,
     name,
     location: typeof els.itemLocation.value === "string" ? els.itemLocation.value.trim() : existingItem?.location || "",
+    locationUpdatedAt: new Date().toISOString(),
     requiredQty: isTemperatureItem ? null : requiredQty,
     countedQty: isTemperatureItem ? 0 : countedQty,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
@@ -1512,7 +1513,7 @@ function upgradePedCartLayout(target, force = false) {
       id: existing?.id || `ped-layout-${index + 1}`,
       sourceId: existing?.sourceId || `ped-layout-${index + 1}`,
       name,
-      location: existing?.stockUpdatedAt && typeof existing.location === "string" ? existing.location : location,
+      location: savedItemLocation(existing, { location }),
       requiredQty: existing?.requiredQty != null && Number.isSafeInteger(Number(existing.requiredQty)) && Number(existing.requiredQty) >= 0 ? Number(existing.requiredQty) : requiredQty,
       countedQty: Number.isFinite(Number(existing?.countedQty)) ? Number(existing.countedQty) : requiredQty,
       expiryDate: existing?.expiryDate || null,
@@ -1526,6 +1527,11 @@ function upgradePedCartLayout(target, force = false) {
   target["Emer cart PED"].push(...currentItems.filter(item => !matchedItems.has(item) && (item.isCustom || !item.sourceId)));
   localStorage.setItem(PED_LAYOUT_VERSION_KEY, PED_LAYOUT_VERSION);
   return true;
+}
+
+function savedItemLocation(item, seed = {}) {
+  if (item?.locationUpdatedAt && typeof item.location === "string") return item.location;
+  return String(item?.location || "").trim() || seed.location || "";
 }
 
 function normalizeName(name) {
@@ -1841,7 +1847,7 @@ function normalizeImportedData(importedData, options = {}) {
           id: item.id || seed.id,
           sourceId: seed.sourceId,
           name: seed.name,
-          location: typeof item.location === "string" ? item.location : seed.location || "",
+          location: savedItemLocation(item, seed),
           requiredQty: item.requiredQty != null && Number.isSafeInteger(Number(item.requiredQty)) && Number(item.requiredQty) >= 0 ? Number(item.requiredQty) : seed.requiredQty,
           countedQty: Number.isFinite(Number(item.countedQty)) ? Number(item.countedQty) : seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
