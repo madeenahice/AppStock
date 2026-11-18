@@ -78,6 +78,8 @@ let cloudSaveTimer = null;
 let stateRevision = 0;
 
 const els = {
+  itemLocation: document.querySelector("#itemLocation"),
+  locationOptions: document.querySelector("#locationOptions"),
   requiredHistory: document.querySelector("#requiredHistory"),
   addItemButton: document.querySelector("#addItemButton"),
   unitTabs: document.querySelector("#unitTabs"),
@@ -1332,6 +1334,9 @@ function openItemDialog(item = null) {
   els.dialogTitle.textContent = editing ? "แก้ไขรายการ" : "เพิ่มรายการ";
   els.editingId.value = item?.id || "";
   els.itemName.value = item?.name || "";
+  els.itemLocation.value = item?.location || "";
+  const locations = [...new Set([...defaultData[activeUnit], ...data[activeUnit]].map(entry => entry.location).filter(Boolean))];
+  els.locationOptions.innerHTML = locations.map(location => `<option value="${escapeHtml(location)}"></option>`).join("");
   els.requiredQty.value = item ? item.requiredQty ?? "" : 1;
   els.countedQty.value = item?.countedQty ?? 0;
   els.noExpiry.checked = !item?.expiryDate;
@@ -1419,7 +1424,7 @@ function saveItem(event) {
     createdAt: existingItem?.createdAt || new Date().toISOString(),
     id,
     name,
-    location: existingItem?.location || "",
+    location: typeof els.itemLocation.value === "string" ? els.itemLocation.value.trim() : existingItem?.location || "",
     requiredQty: isTemperatureItem ? null : requiredQty,
     countedQty: isTemperatureItem ? 0 : countedQty,
     expiryDate: els.noExpiry.checked ? null : els.expiryDate.value,
@@ -1507,7 +1512,7 @@ function upgradePedCartLayout(target, force = false) {
       id: existing?.id || `ped-layout-${index + 1}`,
       sourceId: existing?.sourceId || `ped-layout-${index + 1}`,
       name,
-      location,
+      location: existing?.stockUpdatedAt && typeof existing.location === "string" ? existing.location : location,
       requiredQty: existing?.requiredQty != null && Number.isSafeInteger(Number(existing.requiredQty)) && Number(existing.requiredQty) >= 0 ? Number(existing.requiredQty) : requiredQty,
       countedQty: Number.isFinite(Number(existing?.countedQty)) ? Number(existing.countedQty) : requiredQty,
       expiryDate: existing?.expiryDate || null,
@@ -1836,7 +1841,7 @@ function normalizeImportedData(importedData, options = {}) {
           id: item.id || seed.id,
           sourceId: seed.sourceId,
           name: seed.name,
-          location: seed.location || "",
+          location: typeof item.location === "string" ? item.location : seed.location || "",
           requiredQty: item.requiredQty != null && Number.isSafeInteger(Number(item.requiredQty)) && Number(item.requiredQty) >= 0 ? Number(item.requiredQty) : seed.requiredQty,
           countedQty: Number.isFinite(Number(item.countedQty)) ? Number(item.countedQty) : seed.countedQty,
           expiryDate: item.expiryDate || seed.expiryDate || null,
