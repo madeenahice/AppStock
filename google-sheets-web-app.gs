@@ -99,7 +99,7 @@ function wideInspectionRow(items, log, unit, year) {
 // Current stock is shared across fiscal years; inspection history is archived above.
 function saveState(payload) {
   const sheet = getOrCreateSheet(spreadsheet(), "App State", ["Snapshot chunk"]);
-  const state = JSON.stringify({ sourceVersion: payload.sourceVersion || "", updatedAt: payload.updatedAt || new Date().toISOString(), data: payload.data || {}, checkLogs: payload.checkLogs || [], inspectors: payload.inspectors || [] });
+  const state = JSON.stringify({ sourceVersion: payload.sourceVersion || "", catalogVersion: payload.catalogVersion || "", requiredBaselineVersion: payload.requiredBaselineVersion || "", updatedAt: payload.updatedAt || new Date().toISOString(), data: payload.data || {}, checkLogs: payload.checkLogs || [], inspectors: payload.inspectors || [] });
   const chunks = state.match(/[\s\S]{1,40000}/g) || ["{}"];
   const rows = Math.max(chunks.length, sheet.getLastRow() - 1);
   if (sheet.getMaxRows() < rows + 1) sheet.insertRowsAfter(sheet.getMaxRows(), rows + 1 - sheet.getMaxRows());
